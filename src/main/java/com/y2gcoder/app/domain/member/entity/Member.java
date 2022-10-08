@@ -52,4 +52,9 @@ public class Member extends BaseTimeEntity {
 		this.role = role;
 		this.provider = provider;
 	}
+
+	public void updateRefreshToken(String refreshToken, LocalDateTime tokenExpirationTime) {
+		this.refreshToken = refreshToken;
+		this.tokenExpirationTime = tokenExpirationTime;
+	}
 }
