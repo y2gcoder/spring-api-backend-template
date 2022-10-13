@@ -1,5 +1,7 @@
 package com.y2gcoder.app.global.util;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.SerializationUtils;
 
 import javax.servlet.http.Cookie;
@@ -53,6 +55,23 @@ public class CookieUtils {
 		return clazz.cast(SerializationUtils.deserialize(
 				Base64.getUrlDecoder().decode(cookie.getValue())
 		));
+	}
+
+	public static void addRefreshTokenCookie(
+			HttpServletResponse response,
+			String refreshCookieKey,
+			String refreshToken,
+			long refreshTokenValidityInMs
+	) {
+		ResponseCookie cookie = ResponseCookie.from(refreshCookieKey, refreshToken)
+				.httpOnly(true)
+				.secure(true)
+				.sameSite("Lax")
+				.maxAge(refreshTokenValidityInMs / 1000)
+				.path("/")
+				.build();
+
+		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 	}
 
 }

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -40,7 +41,8 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
 				.antMatchers("/login/oauth2/**").permitAll()
-				.antMatchers("/api/admin/**").hasRole("ADMIN")
+				.antMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+				.antMatchers(HttpMethod.GET).permitAll()
 				.anyRequest().authenticated();
 
 		http.cors()
