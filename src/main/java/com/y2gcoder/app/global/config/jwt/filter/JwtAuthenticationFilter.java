@@ -2,6 +2,7 @@ package com.y2gcoder.app.global.config.jwt.filter;
 
 import com.y2gcoder.app.global.config.jwt.constant.GrantType;
 import com.y2gcoder.app.global.config.jwt.service.JwtTokenProvider;
+import com.y2gcoder.app.global.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +25,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		String jwt = getJwtFromRequest(request);
+		String authorizationHeader = request.getHeader("Authorization");
+		String jwt = JwtUtils.getTokenFromRequest(authorizationHeader);
 
 		if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
 			UsernamePasswordAuthenticationToken authentication = jwtTokenProvider.getAuthentication(jwt);
@@ -37,11 +39,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
-	private String getJwtFromRequest(HttpServletRequest request) {
-		String authorizationHeader = request.getHeader("Authorization");
-		if (StringUtils.hasText(authorizationHeader) && authorizationHeader.startsWith(GrantType.BEARER.getType())) {
-			return authorizationHeader.substring(7);
-		}
-		return null;
-	}
 }
