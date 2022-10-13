@@ -46,14 +46,14 @@ public class JwtTokenProvider {
 				.build();
 	}
 
-	private Date createAccessTokenExpireTime() {
+	public Date createAccessTokenExpireTime() {
 		return new Date(new Date().getTime() + oAuth2Config.getAuth().getAccessTokenValidityInMs());
 	}
 	private Date createRefreshTokenExpireTime() {
 		return new Date(new Date().getTime() + oAuth2Config.getAuth().getRefreshTokenValidityInMs());
 	}
 
-	private String createAccessToken(String memberId, MemberRole memberRole, Date accessTokenExpireTime) {
+	public String createAccessToken(String memberId, MemberRole memberRole, Date accessTokenExpireTime) {
 		SecretKey secretKey = createSecretKey();
 
 		return Jwts.builder()
