@@ -83,7 +83,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 	private boolean isAuthorizedRedirectUri(String uri) {
 		URI clientRedirectUri = URI.create(uri);
 
-		return oAuth2Config.getoAuth2().getAuthorizedRedirectUris()
+		return oAuth2Config.getOAuth2().getAuthorizedRedirectUris()
 				.stream()
 				.anyMatch(authorizedRedirectUri -> {
 					URI authorizedURI = URI.create(authorizedRedirectUri);
