@@ -48,6 +48,14 @@ public class CustomUserDetails implements OAuth2User, UserDetails {
 		this.attributes = attributes;
 	}
 
+	public Long getId() {
+		return id;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
 	@Override
 	public String getPassword() {
 		return password;
@@ -55,7 +63,7 @@ public class CustomUserDetails implements OAuth2User, UserDetails {
 
 	@Override
 	public String getUsername() {
-		return email;
+		return String.valueOf(id);
 	}
 
 	@Override

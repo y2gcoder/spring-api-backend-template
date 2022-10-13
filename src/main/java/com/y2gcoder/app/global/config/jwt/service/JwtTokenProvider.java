@@ -98,7 +98,8 @@ public class JwtTokenProvider {
 
 	public UsernamePasswordAuthenticationToken getAuthentication(String accessToken) {
 		Claims claims = parseClaims(accessToken);
-		Long memberId = claims.get(ClaimKeyType.MEMBER_ID.getType(), Long.class);
+		String stringMemberId = claims.get(ClaimKeyType.MEMBER_ID.getType(), String.class);
+		Long memberId = Long.parseLong(stringMemberId);
 		List<SimpleGrantedAuthority> authorities = Arrays
 				.stream(claims.get(ClaimKeyType.ROLE.getType(), String.class).split(","))
 				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());

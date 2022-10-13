@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -20,6 +19,7 @@ public final class OAuth2Config {
 	@RequiredArgsConstructor
 	public static final class Auth {
 		private final String tokenSecret;
+		private final String refreshCookieKey;
 		private final long accessTokenValidityInMs;
 		private final long refreshTokenValidityInMs;
 	}
@@ -27,7 +27,7 @@ public final class OAuth2Config {
 	@Getter
 	@RequiredArgsConstructor
 	public static final class OAuth2 {
-		private final List<String> authorizedRedirectUris = new ArrayList<>();
+		private final List<String> authorizedRedirectUris;
 	}
 
 }

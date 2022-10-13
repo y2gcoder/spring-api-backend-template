@@ -1,6 +1,5 @@
 package com.y2gcoder.app.global.config.jwt.filter;
 
-import com.y2gcoder.app.global.config.jwt.constant.GrantType;
 import com.y2gcoder.app.global.config.jwt.service.JwtTokenProvider;
 import com.y2gcoder.app.global.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
