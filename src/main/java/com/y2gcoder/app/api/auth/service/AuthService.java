@@ -4,47 +4,41 @@ import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.service.MemberService;
 import com.y2gcoder.app.global.config.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.config.jwt.service.JwtTokenProvider;
-import com.y2gcoder.app.global.config.security.OAuth2Config;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
-import com.y2gcoder.app.global.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
 public class AuthService {
-	private final OAuth2Config oAuth2Config;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final MemberService memberService;
 
 	@Transactional
-	public JwtTokenDto refreshToken(HttpServletRequest request, HttpServletResponse response) {
-		String refreshToken = CookieUtils.getCookie(request, oAuth2Config.getAuth().getRefreshCookieKey())
-				.map(Cookie::getValue).orElseThrow(() -> new AuthenticationException(ErrorCode.NOT_FOUND_REFRESH_TOKEN));
+	public JwtTokenDto refreshToken(String refreshToken) {
+
 		validateRefreshToken(refreshToken);
 		Member member = memberService.findMemberByRefreshToken(refreshToken);
-		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
-		memberService.updateRefreshToken(
-				member.getId(),
-				jwtTokenDto.getRefreshToken(),
-				jwtTokenDto.getRefreshTokenExpireTime()
-		);
 
-		CookieUtils.addRefreshTokenCookie(
-				response,
-				oAuth2Config.getAuth().getRefreshCookieKey(),
-				jwtTokenDto.getRefreshToken(),
-				oAuth2Config.getAuth().getRefreshTokenValidityInMs()
-		);
+		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
+
+		member.updateRefreshToken(jwtTokenDto.getRefreshToken(), jwtTokenDto.getRefreshTokenExpireTime());
 
 		return jwtTokenDto;
+	}
+
+	@Transactional
+	public void signOut(String refreshToken) {
+
+		validateRefreshToken(refreshToken);
+		Member member = memberService.findMemberByRefreshToken(refreshToken);
+
+		member.updateRefreshToken("", LocalDateTime.now());
 	}
 
 	private void validateRefreshToken(String refreshToken) {

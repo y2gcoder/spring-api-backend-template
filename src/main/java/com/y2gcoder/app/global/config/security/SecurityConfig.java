@@ -42,6 +42,7 @@ public class SecurityConfig {
 		http.authorizeRequests()
 				.antMatchers("/login/oauth2/**").permitAll()
 				.antMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+				.antMatchers(HttpMethod.POST, "/api/auth/sign-out").authenticated()
 				.antMatchers(HttpMethod.GET).permitAll()
 				.anyRequest().authenticated();
 
