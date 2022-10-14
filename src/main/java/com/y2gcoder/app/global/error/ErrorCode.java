@@ -14,6 +14,7 @@ public enum ErrorCode {
 	NOT_FOUND_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A-001", "해당 refresh token은 존재하지 않습니다."),
 	EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A-002", "해당 refresh token은 만료되었습니다."),
 	INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A-003", "유효하지 않은 refresh token입니다."),
+	MISMATCH_PASSWORD(HttpStatus.BAD_REQUEST, "A-004", "비밀번호가 일치하지 않습니다."),
 
 	//회원
 	NOT_FOUND_MEMBER(HttpStatus.BAD_REQUEST, "M-001", "해당 회원을 찾을 수 없습니다."),

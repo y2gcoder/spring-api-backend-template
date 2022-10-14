@@ -50,4 +50,10 @@ public class MemberService {
 	public void registerMember(Member member) {
 		memberRepository.save(member);
 	}
+
+	public Member findMemberByEmail(String email) {
+		return memberRepository
+				.findByEmail(email)
+				.orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+	}
 }

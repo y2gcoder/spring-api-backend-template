@@ -1,5 +1,6 @@
 package com.y2gcoder.app.api.auth.service;
 
+import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
 import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
@@ -69,6 +70,28 @@ public class AuthService {
 	private void validateSignUpInfo(SignUpRequest request) {
 		if (memberService.existsMemberByEmail(request.getEmail())) {
 			throw new BusinessException(ErrorCode.ALREADY_REGISTERED_MEMBER);
+		}
+	}
+
+	@Transactional
+	public JwtTokenDto signIn(SignInDto.Request request) {
+		Member member = memberService.findMemberByEmail(request.getEmail());
+		validatePassword(request.getPassword(), member.getPassword());
+		// 토큰 만들기(access, refresh)
+		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
+		// refresh token 저장 (DB)
+		memberService.updateRefreshToken(
+				member.getId(),
+				jwtTokenDto.getRefreshToken(),
+				jwtTokenDto.getRefreshTokenExpireTime()
+		);
+
+		return jwtTokenDto;
+	}
+
+	private void validatePassword(String requestPassword, String memberPassword) {
+		if (!passwordEncoder.matches(requestPassword, memberPassword)) {
+			throw new AuthenticationException(ErrorCode.MISMATCH_PASSWORD);
 		}
 	}
 }

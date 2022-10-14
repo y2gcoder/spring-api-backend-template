@@ -1,6 +1,7 @@
 package com.y2gcoder.app.api.auth.controller;
 
 import com.y2gcoder.app.api.auth.service.AuthService;
+import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
 import com.y2gcoder.app.global.config.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
@@ -8,6 +9,7 @@ import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +31,8 @@ public class AuthController {
 	@PostMapping("/refresh")
 	public ResponseEntity<JwtTokenDto> refreshToken(HttpServletRequest request, HttpServletResponse response) {
 		String refreshToken = CookieUtils.getCookie(request, oAuth2Config.getAuth().getRefreshCookieKey())
-				.map(Cookie::getValue).orElseThrow(() -> new AuthenticationException(ErrorCode.NOT_FOUND_REFRESH_TOKEN));
+				.map(Cookie::getValue)
+				.orElseThrow(() -> new AuthenticationException(ErrorCode.NOT_FOUND_REFRESH_TOKEN));
 
 		JwtTokenDto jwtTokenDto = authService.refreshToken(refreshToken);
 
@@ -57,6 +60,27 @@ public class AuthController {
 	@PostMapping("/sign-up")
 	public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequest request) {
 		authService.signUp(request);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
+
+	@PostMapping("/sign-in")
+	public ResponseEntity<SignInDto.Response> signIn(@Valid @RequestBody SignInDto.Request req, HttpServletResponse response) {
+		JwtTokenDto jwtTokenDto = authService.signIn(req);
+		SignInDto.Response result = SignInDto.Response.builder()
+				.grantType(jwtTokenDto.getGrantType())
+				.accessToken(jwtTokenDto.getAccessToken())
+				.accessTokenExpireTime(jwtTokenDto.getAccessTokenExpireTime())
+				.build();
+
+		//Cookie에 refresh token 저장!!
+		CookieUtils.addRefreshTokenCookie(
+				response,
+				oAuth2Config.getAuth().getRefreshCookieKey(),
+				jwtTokenDto.getRefreshToken(),
+				oAuth2Config.getAuth().getRefreshTokenValidityInMs()
+		);
+
+		return ResponseEntity.ok(result);
+	}
+
 }
