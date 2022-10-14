@@ -95,6 +95,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 		return UriComponentsBuilder.fromUriString(targetUrl)
 				.queryParam("token", jwtTokenDto.getAccessToken())
+				.queryParam("grant", jwtTokenDto.getGrantType())
 				.build().toUriString();
 	}
 
