@@ -5,20 +5,17 @@ import com.y2gcoder.app.domain.member.repository.MemberRepository;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.error.exception.EntityNotFoundException;
-import com.y2gcoder.app.global.util.DateTimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
 public class MemberService {
 	private final MemberRepository memberRepository;
-
 
 	@Transactional
 	public void updateRefreshToken(Long memberId, String refreshToken, LocalDateTime refreshTokenExpireTime) {
@@ -38,5 +35,11 @@ public class MemberService {
 		}
 
 		return member;
+	}
+
+	public Member findMemberById(Long memberId) {
+		return memberRepository
+				.findById(memberId)
+				.orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
 	}
 }
