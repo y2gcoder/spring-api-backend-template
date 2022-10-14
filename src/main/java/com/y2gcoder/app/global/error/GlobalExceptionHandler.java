@@ -6,12 +6,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+	/**
+	 * 필요한 Cookie가 없을 때 예외(Refresh Token이 유력)
+	 */
+	@ExceptionHandler(MissingRequestCookieException.class)
+	protected ResponseEntity<ErrorResponse> handleMissingRequestCookieException(MissingRequestCookieException e) {
+		log.error("MissingRequestCookieException", e);
+		ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.BAD_REQUEST.toString(), e.getMessage());
+		return ResponseEntity.badRequest().body(errorResponse);
+	}
 
 	/**
 	 * 유효성 검사 관련 예외

@@ -76,22 +76,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 				jwtTokenDto.getRefreshTokenExpireTime()
 		);
 
-		ResponseCookie cookie = ResponseCookie.from(oAuth2Config.getAuth().getRefreshCookieKey(), jwtTokenDto.getRefreshToken())
-				.httpOnly(true)
-				.secure(true)
-				.sameSite("Lax")
-				.maxAge(oAuth2Config.getAuth().getRefreshTokenValidityInMs() / 1000)
-				.path("/")
-				.build();
-
-		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-		CookieUtils.addRefreshTokenCookie(
-				response,
+		ResponseCookie refreshTokenCookie = CookieUtils.generateResponseCookie(
 				oAuth2Config.getAuth().getRefreshCookieKey(),
 				jwtTokenDto.getRefreshToken(),
-				oAuth2Config.getAuth().getRefreshTokenValidityInMs()
+				oAuth2Config.getAuth().getRefreshTokenValidityInMs() / 1000
 		);
+
+		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
 		return UriComponentsBuilder.fromUriString(targetUrl)
 				.queryParam("token", jwtTokenDto.getAccessToken())
