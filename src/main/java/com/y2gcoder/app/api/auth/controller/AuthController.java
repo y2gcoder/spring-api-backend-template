@@ -1,6 +1,7 @@
 package com.y2gcoder.app.api.auth.controller;
 
 import com.y2gcoder.app.api.auth.service.AuthService;
+import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
 import com.y2gcoder.app.global.config.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
 import com.y2gcoder.app.global.error.ErrorCode;
@@ -9,12 +10,14 @@ import com.y2gcoder.app.global.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/auth/")
@@ -48,6 +51,12 @@ public class AuthController {
 
 		CookieUtils.deleteCookie(request, response, oAuth2Config.getAuth().getRefreshCookieKey());
 
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/sign-up")
+	public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequest request) {
+		authService.signUp(request);
 		return ResponseEntity.ok().build();
 	}
 }

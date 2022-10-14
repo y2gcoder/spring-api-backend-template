@@ -42,4 +42,12 @@ public class MemberService {
 				.findById(memberId)
 				.orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
 	}
+
+	public boolean existsMemberByEmail(String email) {
+		return memberRepository.existsByEmail(email);
+	}
+
+	public void registerMember(Member member) {
+		memberRepository.save(member);
+	}
 }

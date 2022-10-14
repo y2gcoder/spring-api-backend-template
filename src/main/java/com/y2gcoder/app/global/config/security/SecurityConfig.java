@@ -16,6 +16,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -38,10 +40,15 @@ public class SecurityConfig {
 	private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
 	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+	}
+
+	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
 				.antMatchers("/login/oauth2/**").permitAll()
-				.antMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+				.antMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/sign-up", "/api/auth/sign-in").permitAll()
 				.antMatchers(HttpMethod.POST, "/api/auth/sign-out").authenticated()
 				.antMatchers(HttpMethod.GET, "/api/members/me").authenticated()
 				.antMatchers(HttpMethod.GET).permitAll()

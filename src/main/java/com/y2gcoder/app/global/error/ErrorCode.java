@@ -17,6 +17,7 @@ public enum ErrorCode {
 
 	//회원
 	NOT_FOUND_MEMBER(HttpStatus.BAD_REQUEST, "M-001", "해당 회원을 찾을 수 없습니다."),
+	ALREADY_REGISTERED_MEMBER(HttpStatus.BAD_REQUEST, "M-002", "이미 가입된 회원입니다."),
 	;
 	private final HttpStatus httpStatus;
 	private final String errorCode;
