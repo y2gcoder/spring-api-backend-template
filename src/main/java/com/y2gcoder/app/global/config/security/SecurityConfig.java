@@ -26,7 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(
 		securedEnabled = true
 		, prePostEnabled = true
-//		, jsr250Enabled = true
+		, jsr250Enabled = true
 )
 @EnableWebSecurity
 @Configuration
@@ -51,7 +51,8 @@ public class SecurityConfig {
 				.antMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/sign-up", "/api/auth/sign-in").permitAll()
 				.antMatchers(HttpMethod.POST, "/api/auth/sign-out").authenticated()
 				.antMatchers(HttpMethod.GET, "/api/members/me").authenticated()
-				.antMatchers(HttpMethod.GET).permitAll()
+				.antMatchers(HttpMethod.DELETE, "/api/members/{id}").authenticated()
+				.antMatchers(HttpMethod.GET, "/api/**").permitAll()
 				.anyRequest().authenticated();
 
 		http.cors()

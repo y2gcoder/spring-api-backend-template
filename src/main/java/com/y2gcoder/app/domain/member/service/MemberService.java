@@ -56,4 +56,12 @@ public class MemberService {
 				.findByEmail(email)
 				.orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
 	}
+
+	@Transactional
+	public void withdrawMember(Long memberId) {
+		Member member = memberRepository
+				.findById(memberId)
+				.orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+		memberRepository.delete(member);
+	}
 }
