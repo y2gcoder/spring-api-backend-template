@@ -4,8 +4,7 @@ import com.y2gcoder.app.api.auth.service.AuthService;
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
 import com.y2gcoder.app.global.config.jwt.dto.JwtTokenDto;
-import com.y2gcoder.app.global.config.security.OAuth2Config;
-import com.y2gcoder.app.global.util.CookieUtils;
+import com.y2gcoder.app.global.util.RefreshTokenCookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,8 +17,9 @@ import javax.validation.Valid;
 @RequestMapping("/api/auth/")
 @RestController
 public class AuthController {
-	private final OAuth2Config oAuth2Config;
+
 	private final AuthService authService;
+	private final RefreshTokenCookieUtils refreshTokenCookieUtils;
 
 	@PostMapping("/sign-up")
 	public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequest request) {
@@ -37,9 +37,10 @@ public class AuthController {
 				.build();
 
 		//Cookie에 refresh token 저장!!
-		String generatedRefreshTokenCookie = generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
+		String refreshTokenCookie = refreshTokenCookieUtils
+				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
 
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, generatedRefreshTokenCookie).body(result);
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie).body(result);
 	}
 
 	@PostMapping("/refresh")
@@ -47,17 +48,10 @@ public class AuthController {
 
 		JwtTokenDto jwtTokenDto = authService.refreshToken(refreshToken);
 
-		String generatedRefreshTokenCookie = generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
+		String refreshTokenCookie = refreshTokenCookieUtils
+				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
 
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, generatedRefreshTokenCookie).body(jwtTokenDto);
-	}
-
-	private String generateRefreshTokenCookie(String refreshToken) {
-		return CookieUtils.generateResponseCookie(
-				oAuth2Config.getAuth().getRefreshCookieKey(),
-				refreshToken,
-				oAuth2Config.getAuth().getRefreshTokenValidityInMs() / 1000
-		).toString();
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie).body(jwtTokenDto);
 	}
 
 	@PostMapping("/sign-out")
@@ -65,17 +59,9 @@ public class AuthController {
 
 		authService.signOut(refreshToken);
 
-		String generatedSignOutCookie = generateSignOutCookie();
+		String signOutCookie = refreshTokenCookieUtils.generateSignOutCookie();
 
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, generatedSignOutCookie).build();
-	}
-
-	private String generateSignOutCookie() {
-		return CookieUtils.generateResponseCookie(
-				oAuth2Config.getAuth().getRefreshCookieKey(),
-				"",
-				1
-		).toString();
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, signOutCookie).build();
 	}
 
 }
