@@ -1,6 +1,7 @@
-package com.y2gcoder.app.global.config;
+package com.y2gcoder.app.global.config.security;
 
-import com.y2gcoder.app.global.config.security.OAuth2Config;
+import com.y2gcoder.app.global.config.PropertiesConfiguration;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,26 +12,30 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties(value = OAuth2Config.class)
 @ContextConfiguration(initializers = ConfigDataApplicationContextInitializer.class, classes = PropertiesConfiguration.class)
-class PropertiesConfigurationTest {
+class OAuth2ConfigValidationTest {
 	@Autowired
 	private OAuth2Config oAuth2Config;
 
+	private static Validator propertyValidator;
+
+	@BeforeAll
+	public static void setup() {
+		propertyValidator = Validation.buildDefaultValidatorFactory().getValidator();
+	}
+
 	@Test
-	@DisplayName("OAuth2Config: 프로퍼티 테스트, 성공")
-	void whenBindingOAuth2Config_thenAllFieldsAreSet() {
-		//given
-		//when
-		//then
-		assertThat(oAuth2Config.getOAuth2().getAuthorizedRedirectUris()).contains("http://localhost:3000/oauth2/redirect");
-		assertThat(oAuth2Config.getAuth().getTokenSecret()).isNotEmpty();
-		assertThat(oAuth2Config.getAuth().getRefreshCookieKey()).isEqualTo("refreshtoken");
-		assertThat(oAuth2Config.getAuth().getAccessTokenValidityInMs()).isNotZero().isPositive();
-		assertThat(oAuth2Config.getAuth().getRefreshTokenValidityInMs()).isNotZero().isPositive();
+	@DisplayName("OAuthConfig: Validation, 성공")
+	void whenBindingPropertiesToValidatedBeans_thenConstrainsAreChecked() {
+		assertThat(propertyValidator.validate(oAuth2Config.getOAuth2()).size()).isZero();
+		assertThat(propertyValidator.validate(oAuth2Config.getAuth()).size()).isZero();
 	}
 }
