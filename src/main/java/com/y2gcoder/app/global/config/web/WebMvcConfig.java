@@ -1,8 +1,7 @@
-package com.y2gcoder.app.global.config;
+package com.y2gcoder.app.global.config.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navercorp.lucy.security.xss.servletfilter.XssEscapeServletFilter;
-import com.y2gcoder.app.global.config.web.HtmlCharacterEscapes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
