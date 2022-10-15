@@ -1,7 +1,20 @@
 spring:
+  profiles:
+    active: test
   jpa:
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        default_batch_fetch_size: 1000
+        format_sql: true
+        use_sql_comments: true
     hibernate:
       ddl-auto: create
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
   security:
     oauth2:
       client:
@@ -10,6 +23,12 @@ spring:
             client-id: TODO
             client-secret: TODO
             scope: profile, email
+
+logging:
+  level:
+    com.y2gcoder.app: debug
+    org.hibernate.sql: info
+    org.hibernate.type.descriptor.sql: trace
 
 app:
   auth:
