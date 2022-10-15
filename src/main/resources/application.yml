@@ -2,6 +2,7 @@ spring:
   # TODO 개발 데이터베이스 연결
   jpa:
     open-in-view: false
+    show-sql: true
     properties:
       hibernate:
         default_batch_fetch_size: 1000
@@ -13,9 +14,27 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 100MB
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: TODO
+            client-secret: TODO
+            scope: profile, email
 
 logging:
   level:
     com.y2gcoder.app: debug
     org.hibernate.sql: info
     org.hibernate.type.descriptor.sql: trace
+
+app:
+  auth:
+    token-secret: TODO
+    refresh-cookie-key: refreshtoken
+    access-token-validity-in-ms: 900000
+    refresh-token-validity-in-ms: 1209600000
+  oauth2:
+    authorized-redirect-uris:
+      - http://localhost:3000/oauth2/redirect
