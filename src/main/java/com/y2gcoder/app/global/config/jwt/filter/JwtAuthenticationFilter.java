@@ -31,8 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			UsernamePasswordAuthenticationToken authentication = jwtTokenProvider.getAuthentication(jwt);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			log.debug("JWT로 {}의 인증정보 저장", authentication.getName());
-		} else {
-			log.debug("유효한 JWT 토큰이 없습니다.");
 		}
 
 		filterChain.doFilter(request, response);
