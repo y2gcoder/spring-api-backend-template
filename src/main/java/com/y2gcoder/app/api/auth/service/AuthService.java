@@ -27,35 +27,6 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 
 	@Transactional
-	public JwtTokenDto refreshToken(String refreshToken) {
-
-		validateRefreshToken(refreshToken);
-		Member member = memberService.findMemberByRefreshToken(refreshToken);
-
-		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
-
-		member.updateRefreshToken(jwtTokenDto.getRefreshToken(), jwtTokenDto.getRefreshTokenExpireTime());
-
-		return jwtTokenDto;
-	}
-
-	@Transactional
-	public void signOut(String refreshToken) {
-
-		validateRefreshToken(refreshToken);
-		Member member = memberService.findMemberByRefreshToken(refreshToken);
-
-		member.updateRefreshToken("", LocalDateTime.now());
-	}
-
-	private void validateRefreshToken(String refreshToken) {
-		boolean validateToken = jwtTokenProvider.validateToken(refreshToken);
-		if (!validateToken) {
-			throw new AuthenticationException(ErrorCode.INVALID_REFRESH_TOKEN);
-		}
-	}
-
-	@Transactional
 	public void signUp(SignUpRequest request) {
 		validateSignUpInfo(request);
 		Member member = Member.builder()
@@ -92,6 +63,35 @@ public class AuthService {
 	private void validatePassword(String requestPassword, String memberPassword) {
 		if (!passwordEncoder.matches(requestPassword, memberPassword)) {
 			throw new AuthenticationException(ErrorCode.MISMATCH_PASSWORD);
+		}
+	}
+
+	@Transactional
+	public JwtTokenDto refreshToken(String refreshToken) {
+
+		validateRefreshToken(refreshToken);
+		Member member = memberService.findMemberByRefreshToken(refreshToken);
+
+		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
+
+		member.updateRefreshToken(jwtTokenDto.getRefreshToken(), jwtTokenDto.getRefreshTokenExpireTime());
+
+		return jwtTokenDto;
+	}
+
+	@Transactional
+	public void signOut(String refreshToken) {
+
+		validateRefreshToken(refreshToken);
+		Member member = memberService.findMemberByRefreshToken(refreshToken);
+
+		member.updateRefreshToken("", LocalDateTime.now());
+	}
+
+	private void validateRefreshToken(String refreshToken) {
+		boolean validateToken = jwtTokenProvider.validateToken(refreshToken);
+		if (!validateToken) {
+			throw new AuthenticationException(ErrorCode.INVALID_REFRESH_TOKEN);
 		}
 	}
 }
