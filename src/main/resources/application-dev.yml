@@ -1,4 +1,5 @@
 spring:
+  # TODO 개발 데이터베이스 연결
   jpa:
     hibernate:
       ddl-auto: create
@@ -7,13 +8,13 @@ spring:
       client:
         registration:
           google:
-            client-id: TODO
-            client-secret: TODO
+            client-id: ${oauth-id-google}
+            client-secret: ${oauth-secret-google}
             scope: profile, email
 
 app:
   auth:
-    token-secret: dGVzdGtleXRlc3RrZXl0ZXN0a2V5dGVzdGtleXRlc3RrZXl0ZXN0a2V5dGVzdGtleXRlc3RrZXkK
+    token-secret: ${token-secret}
     refresh-cookie-key: refreshtoken
     access-token-validity-in-ms: 900000
     refresh-token-validity-in-ms: 1209600000
