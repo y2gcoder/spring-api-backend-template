@@ -32,7 +32,7 @@ logging:
 
 app:
   auth:
-    token-secret: dGVzdGtleXRlc3RrZXl0ZXN0a2V5dGVzdGtleXRlc3RrZXl0ZXN0a2V5dGVzdGtleXRlc3RrZXkK
+    token-secret: and0LXNlY3JldC1mb3Itc3ByaW5nYm9vdC1hcGktdGVtcGxhdGUtYnkteTJnY29kZXItdGhpcy10ZXN0LWJhc2U2NAo=
     refresh-cookie-key: refreshtoken
     access-token-validity-in-ms: 900000
     refresh-token-validity-in-ms: 1209600000

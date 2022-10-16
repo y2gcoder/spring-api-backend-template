@@ -61,7 +61,7 @@ public class JwtTokenProvider {
 				.setIssuedAt(new Date())
 				.setExpiration(accessTokenExpireTime)
 				.claim(ClaimKeyType.MEMBER_ID.getType(), memberId)
-				.claim(ClaimKeyType.ROLE.getType(), memberRole)
+				.claim(ClaimKeyType.ROLE.getType(), memberRole.getRole())
 				.signWith(secretKey, SignatureAlgorithm.HS512)
 				.setHeaderParam("typ", "JWT")
 				.compact();
