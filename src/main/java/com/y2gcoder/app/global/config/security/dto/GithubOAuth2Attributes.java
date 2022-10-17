@@ -31,7 +31,7 @@ public class GithubOAuth2Attributes extends OAuth2Attributes {
 		return
 				attributes.get("email") != null && StringUtils.hasText(attributes.get("email").toString())
 						? attributes.get("email").toString()
-						: ((Integer) attributes.get("id")).toString();
+						: ((Integer) attributes.get("login")).toString();
 	}
 
 	@Override
