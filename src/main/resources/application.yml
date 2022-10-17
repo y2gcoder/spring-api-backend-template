@@ -26,9 +26,6 @@ spring:
             client-id: TODO
             client-secret: TODO
             scope: user
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
 
 logging:
   level:
