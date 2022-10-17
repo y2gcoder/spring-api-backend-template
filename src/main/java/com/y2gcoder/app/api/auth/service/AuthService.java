@@ -47,6 +47,7 @@ public class AuthService {
 	@Transactional
 	public JwtTokenDto signIn(SignInDto.Request request) {
 		Member member = memberService.findMemberByEmail(request.getEmail());
+		validateMemberAuthProvider(member.getProvider());
 		validatePassword(request.getPassword(), member.getPassword());
 		// 토큰 만들기(access, refresh)
 		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
@@ -58,6 +59,12 @@ public class AuthService {
 		);
 
 		return jwtTokenDto;
+	}
+
+	private void validateMemberAuthProvider(AuthProvider provider) {
+		if (!provider.equals(AuthProvider.local)) {
+			throw new AuthenticationException(ErrorCode.SOCIAL_SIGN_IN_MEMBER);
+		}
 	}
 
 	private void validatePassword(String requestPassword, String memberPassword) {

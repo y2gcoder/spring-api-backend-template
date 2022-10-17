@@ -9,6 +9,7 @@ public enum ErrorCode {
 	NOT_EXISTS_AUTH_PROVIDER(HttpStatus.UNAUTHORIZED, "OA-001", "해당 OAuth2 Provider는 지원하지 않습니다."),
 	INVALID_AUTH_PROVIDER(HttpStatus.UNAUTHORIZED, "OA-002", "해당 OAuth2 Provider로 로그인한 회원이 아닙니다."),
 	IS_NOT_REDIRECT_URI(HttpStatus.BAD_REQUEST, "OA-003", "리다이렉트 URI가 일치하지 않습니다."),
+	SOCIAL_SIGN_IN_MEMBER(HttpStatus.UNAUTHORIZED, "OA-004", "소셜 로그인 회원입니다. 이메일, 패스워드로 로그인할 수 없습니다."),
 
 	//인증 && 인가
 	NOT_FOUND_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A-001", "해당 refresh token은 존재하지 않습니다."),
