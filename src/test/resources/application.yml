@@ -23,6 +23,10 @@ spring:
             client-id: TODO
             client-secret: TODO
             scope: profile, email
+          github:
+            client-id: TODO
+            client-secret: TODO
+            scope: user
 
 logging:
   level:

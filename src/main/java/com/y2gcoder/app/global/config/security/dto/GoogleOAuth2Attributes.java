@@ -4,9 +4,9 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 
 import java.util.Map;
 
-public class GoogleOAuthAttributes extends OAuth2Attributes {
+public class GoogleOAuth2Attributes extends OAuth2Attributes {
 
-	public GoogleOAuthAttributes(Map<String, Object> attributes) {
+	public GoogleOAuth2Attributes(Map<String, Object> attributes) {
 		super(attributes);
 	}
 

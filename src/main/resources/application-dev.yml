@@ -15,6 +15,10 @@ spring:
             client-id: ${oauth-id-google}
             client-secret: ${oauth-secret-google}
             scope: profile, email
+          github:
+            client-id: ${oauth-id-github}
+            client-secret: ${oauth-secret-github}
+            scope: user
 
 app:
   auth:

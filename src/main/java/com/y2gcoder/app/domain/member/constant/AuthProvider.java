@@ -6,5 +6,5 @@ import lombok.Getter;
 public enum AuthProvider {
 	local,
 	google,
-
+	github,
 }
