@@ -1,0 +1,23 @@
+= Spring REST Docs
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+[[resources-health]]
+== Health
+
+[[resources-health-check]]
+=== Health Check
+
+==== HTTP Request
+
+include::{snippets}/health-check/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/health-check/http-response.adoc[]
+
+include::{snippets}/health-check/response-fields.adoc[]

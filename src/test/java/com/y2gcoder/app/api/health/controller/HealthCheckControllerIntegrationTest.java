@@ -1,44 +1,51 @@
 package com.y2gcoder.app.api.health.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.web.servlet.ResultActions;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureRestDocs(uriScheme = "https", uriHost = "y2gcoder.com", uriPort = 443)
+@ExtendWith(RestDocumentationExtension.class)
 @AutoConfigureMockMvc
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 class HealthCheckControllerIntegrationTest {
 
 	@Autowired
-	WebApplicationContext context;
-
-	@Autowired
-	MockMvc mockMvc;
-
-	@BeforeEach
-	void beforeEach() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-	}
+	private MockMvc mockMvc;
 
 	@Test
 	@DisplayName("Health Check: 성공")
-	void healthCheck_Normal_Success() throws Exception {
+	void whenGetApiHealth_thenHealthOkActiveProfilesTest() throws Exception {
 		//given
 		//when
+		ResultActions resultActions = this.mockMvc.perform(
+				RestDocumentationRequestBuilders.get("/api/health")
+						.accept(MediaType.APPLICATION_JSON)
+		);
 		//then
-		mockMvc.perform(
-						get("/api/health")
-				).andExpect(status().isOk())
-				.andExpect(jsonPath("$.health").value("ok"))
-				.andExpect(jsonPath("$.activeProfiles").value("test"));
+		resultActions.andExpect(status().isOk())
+				.andDo(
+						document(
+								"health-check",
+								responseFields(
+										fieldWithPath("health").description("server health status"),
+										fieldWithPath("activeProfiles").description("server active profiles")
+								)
+						)
+				);
 	}
 }
