@@ -1,4 +1,4 @@
-package com.y2gcoder.app.global.config.security.repository;
+package com.y2gcoder.app.global.security.repository;
 
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import com.y2gcoder.app.global.util.CookieUtils;

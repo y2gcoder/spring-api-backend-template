@@ -1,12 +1,12 @@
-package com.y2gcoder.app.global.config.security.service;
+package com.y2gcoder.app.global.security.service;
 
 import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
-import com.y2gcoder.app.global.config.security.dto.CustomUserDetails;
-import com.y2gcoder.app.global.config.security.dto.OAuth2AttributeFactory;
-import com.y2gcoder.app.global.config.security.dto.OAuth2Attributes;
+import com.y2gcoder.app.global.security.dto.CustomUserDetails;
+import com.y2gcoder.app.global.security.dto.OAuth2AttributeFactory;
+import com.y2gcoder.app.global.security.dto.OAuth2Attributes;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import lombok.RequiredArgsConstructor;

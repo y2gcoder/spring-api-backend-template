@@ -1,12 +1,12 @@
-package com.y2gcoder.app.global.config.security.handler;
+package com.y2gcoder.app.global.security.handler;
 
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.service.MemberService;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
-import com.y2gcoder.app.global.config.security.dto.CustomUserDetails;
-import com.y2gcoder.app.global.config.security.repository.CustomAuthorizationRequestRepository;
+import com.y2gcoder.app.global.security.dto.CustomUserDetails;
+import com.y2gcoder.app.global.security.repository.CustomAuthorizationRequestRepository;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.util.CookieUtils;
@@ -28,8 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
-
-import static com.y2gcoder.app.global.config.security.repository.CustomAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -55,7 +53,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 	protected String determineTargetUrl(
 			HttpServletRequest request, HttpServletResponse response, Authentication authentication
 	) {
-		Optional<String> redirectUri = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME).map(Cookie::getValue);
+		Optional<String> redirectUri = CookieUtils
+				.getCookie(request, CustomAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME).map(Cookie::getValue);
 
 		if (redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
 			throw new AuthenticationException(ErrorCode.IS_NOT_REDIRECT_URI);

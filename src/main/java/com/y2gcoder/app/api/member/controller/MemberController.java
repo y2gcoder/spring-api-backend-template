@@ -1,7 +1,7 @@
 package com.y2gcoder.app.api.member.controller;
 
 import com.y2gcoder.app.domain.member.service.MemberService;
-import com.y2gcoder.app.global.config.security.guard.AuthHelper;
+import com.y2gcoder.app.global.security.guard.AuthHelper;
 import com.y2gcoder.app.global.util.RefreshTokenCookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

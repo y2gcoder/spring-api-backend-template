@@ -1,12 +1,12 @@
 package com.y2gcoder.app.global.config.security;
 
 import com.y2gcoder.app.global.jwt.filter.JwtAuthenticationFilter;
-import com.y2gcoder.app.global.config.security.handler.CustomAccessDeniedHandler;
-import com.y2gcoder.app.global.config.security.handler.CustomAuthenticationEntrypoint;
-import com.y2gcoder.app.global.config.security.handler.OAuth2AuthenticationFailureHandler;
-import com.y2gcoder.app.global.config.security.handler.OAuth2AuthenticationSuccessHandler;
-import com.y2gcoder.app.global.config.security.repository.CustomAuthorizationRequestRepository;
-import com.y2gcoder.app.global.config.security.service.CustomOAuth2UserService;
+import com.y2gcoder.app.global.security.handler.CustomAccessDeniedHandler;
+import com.y2gcoder.app.global.security.handler.CustomAuthenticationEntrypoint;
+import com.y2gcoder.app.global.security.handler.OAuth2AuthenticationFailureHandler;
+import com.y2gcoder.app.global.security.handler.OAuth2AuthenticationSuccessHandler;
+import com.y2gcoder.app.global.security.repository.CustomAuthorizationRequestRepository;
+import com.y2gcoder.app.global.security.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

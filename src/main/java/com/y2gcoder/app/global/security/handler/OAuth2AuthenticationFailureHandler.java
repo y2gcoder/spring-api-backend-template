@@ -1,6 +1,6 @@
-package com.y2gcoder.app.global.config.security.handler;
+package com.y2gcoder.app.global.security.handler;
 
-import com.y2gcoder.app.global.config.security.repository.CustomAuthorizationRequestRepository;
+import com.y2gcoder.app.global.security.repository.CustomAuthorizationRequestRepository;
 import com.y2gcoder.app.global.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.AuthenticationException;
@@ -14,8 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static com.y2gcoder.app.global.config.security.repository.CustomAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
-
 @RequiredArgsConstructor
 @Component
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
@@ -23,7 +21,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
 	@Override
 	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-		String targetUrl = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
+		String targetUrl = CookieUtils.getCookie(request, CustomAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME)
 				.map(Cookie::getValue)
 				.orElse("/");
 

@@ -1,4 +1,4 @@
-package com.y2gcoder.app.global.config.security.guard;
+package com.y2gcoder.app.global.security.guard;
 
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import lombok.RequiredArgsConstructor;

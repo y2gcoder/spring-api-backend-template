@@ -1,4 +1,4 @@
-package com.y2gcoder.app.global.config.security.dto;
+package com.y2gcoder.app.global.security.dto;
 
 import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import org.springframework.util.StringUtils;

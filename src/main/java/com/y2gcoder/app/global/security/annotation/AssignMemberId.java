@@ -1,4 +1,4 @@
-package com.y2gcoder.app.global.config.security.annotation;
+package com.y2gcoder.app.global.security.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

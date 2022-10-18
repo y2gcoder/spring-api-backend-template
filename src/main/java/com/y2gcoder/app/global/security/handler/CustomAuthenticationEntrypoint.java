@@ -1,4 +1,4 @@
-package com.y2gcoder.app.global.config.security.handler;
+package com.y2gcoder.app.global.security.handler;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

@@ -1,6 +1,6 @@
-package com.y2gcoder.app.global.config.security.aop;
+package com.y2gcoder.app.global.security.aop;
 
-import com.y2gcoder.app.global.config.security.guard.AuthHelper;
+import com.y2gcoder.app.global.security.guard.AuthHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -17,7 +17,7 @@ import java.util.Optional;
 @Aspect
 public class AssignMemberIdAspect {
 
-	@Before("@annotation(com.y2gcoder.app.global.config.security.annotation.AssignMemberId)")
+	@Before("@annotation(com.y2gcoder.app.global.security.annotation.AssignMemberId)")
 	public void assignMemberId(JoinPoint joinPoint) {
 		Arrays.stream(joinPoint.getArgs())
 				.forEach(arg ->

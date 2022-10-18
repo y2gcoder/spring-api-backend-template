@@ -1,4 +1,4 @@
-package com.y2gcoder.app.global.config.security.dto;
+package com.y2gcoder.app.global.security.dto;
 
 import lombok.ToString;
 

@@ -3,7 +3,7 @@ package com.y2gcoder.app.global.jwt.service;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.global.config.PropertiesConfiguration;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
-import com.y2gcoder.app.global.config.security.dto.CustomUserDetails;
+import com.y2gcoder.app.global.security.dto.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

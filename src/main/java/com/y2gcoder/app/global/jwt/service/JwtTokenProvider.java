@@ -6,7 +6,7 @@ import com.y2gcoder.app.global.jwt.constant.GrantType;
 import com.y2gcoder.app.global.jwt.constant.TokenType;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
-import com.y2gcoder.app.global.config.security.dto.CustomUserDetails;
+import com.y2gcoder.app.global.security.dto.CustomUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
