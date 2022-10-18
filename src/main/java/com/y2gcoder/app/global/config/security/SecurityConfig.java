@@ -1,8 +1,8 @@
 package com.y2gcoder.app.global.config.security;
 
 import com.y2gcoder.app.global.jwt.filter.JwtAuthenticationFilter;
-import com.y2gcoder.app.global.config.security.handler.JwtAccessDeniedHandler;
-import com.y2gcoder.app.global.config.security.handler.JwtAuthenticationEntrypoint;
+import com.y2gcoder.app.global.config.security.handler.CustomAccessDeniedHandler;
+import com.y2gcoder.app.global.config.security.handler.CustomAuthenticationEntrypoint;
 import com.y2gcoder.app.global.config.security.handler.OAuth2AuthenticationFailureHandler;
 import com.y2gcoder.app.global.config.security.handler.OAuth2AuthenticationSuccessHandler;
 import com.y2gcoder.app.global.config.security.repository.CustomAuthorizationRequestRepository;
@@ -36,8 +36,8 @@ public class SecurityConfig {
 	private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 	private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
-	private final JwtAuthenticationEntrypoint jwtAuthenticationEntrypoint;
-	private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+	private final CustomAuthenticationEntrypoint customAuthenticationEntrypoint;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -73,8 +73,8 @@ public class SecurityConfig {
 				.failureHandler(oAuth2AuthenticationFailureHandler);
 
 		http.exceptionHandling()
-				.authenticationEntryPoint(jwtAuthenticationEntrypoint)
-				.accessDeniedHandler(jwtAccessDeniedHandler);
+				.authenticationEntryPoint(customAuthenticationEntrypoint)
+				.accessDeniedHandler(customAccessDeniedHandler);
 
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
