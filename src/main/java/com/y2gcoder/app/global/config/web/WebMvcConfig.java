@@ -2,6 +2,7 @@ package com.y2gcoder.app.global.config.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navercorp.lucy.security.xss.servletfilter.XssEscapeServletFilter;
+import com.y2gcoder.app.global.resolver.signinmember.SignInMemberArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -18,6 +20,7 @@ import java.util.List;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
+	private final SignInMemberArgumentResolver signInMemberArgumentResolver;
 	private final ObjectMapper objectMapper;
 
 	private static final long MAX_AGE_SECS = 3600;
@@ -37,6 +40,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				.allowedHeaders("*")
 				.allowCredentials(true)
 				.maxAge(MAX_AGE_SECS);
+	}
+
+	@Override
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+		resolvers.add(signInMemberArgumentResolver);
 	}
 
 	@Bean

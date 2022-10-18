@@ -109,7 +109,7 @@ public class JwtTokenProvider {
 		return new UsernamePasswordAuthenticationToken(customUserDetails, "", authorities);
 	}
 
-	private Claims parseClaims(String token) {
+	public Claims parseClaims(String token) {
 		return Jwts.parserBuilder()
 				.setSigningKey(createSecretKey()).build().parseClaimsJws(token).getBody();
 	}
