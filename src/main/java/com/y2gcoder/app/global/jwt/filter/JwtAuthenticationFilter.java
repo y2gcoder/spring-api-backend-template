@@ -1,6 +1,6 @@
-package com.y2gcoder.app.global.config.jwt.filter;
+package com.y2gcoder.app.global.jwt.filter;
 
-import com.y2gcoder.app.global.config.jwt.service.JwtTokenProvider;
+import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
 import com.y2gcoder.app.global.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
 package com.y2gcoder.app.global.config.security;
 
-import com.y2gcoder.app.global.config.jwt.filter.JwtAuthenticationFilter;
+import com.y2gcoder.app.global.jwt.filter.JwtAuthenticationFilter;
 import com.y2gcoder.app.global.config.security.handler.JwtAccessDeniedHandler;
 import com.y2gcoder.app.global.config.security.handler.JwtAuthenticationEntrypoint;
 import com.y2gcoder.app.global.config.security.handler.OAuth2AuthenticationFailureHandler;

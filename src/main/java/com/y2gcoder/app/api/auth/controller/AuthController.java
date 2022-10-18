@@ -3,7 +3,7 @@ package com.y2gcoder.app.api.auth.controller;
 import com.y2gcoder.app.api.auth.service.AuthService;
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
-import com.y2gcoder.app.global.config.jwt.dto.JwtTokenDto;
+import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.util.RefreshTokenCookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

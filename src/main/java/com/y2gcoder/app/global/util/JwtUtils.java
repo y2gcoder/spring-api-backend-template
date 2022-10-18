@@ -1,6 +1,6 @@
 package com.y2gcoder.app.global.util;
 
-import com.y2gcoder.app.global.config.jwt.constant.GrantType;
+import com.y2gcoder.app.global.jwt.constant.GrantType;
 import org.springframework.util.StringUtils;
 
 public class JwtUtils {

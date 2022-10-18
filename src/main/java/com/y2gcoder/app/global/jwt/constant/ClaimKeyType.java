@@ -1,4 +1,4 @@
-package com.y2gcoder.app.global.config.jwt.constant;
+package com.y2gcoder.app.global.jwt.constant;
 
 import lombok.Getter;
 

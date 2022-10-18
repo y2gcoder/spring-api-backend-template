@@ -1,4 +1,4 @@
-package com.y2gcoder.app.global.config.jwt.dto;
+package com.y2gcoder.app.global.jwt.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.y2gcoder.app.global.util.DateTimeUtils;

@@ -1,10 +1,10 @@
-package com.y2gcoder.app.global.config.jwt.service;
+package com.y2gcoder.app.global.jwt.service;
 
 import com.y2gcoder.app.domain.member.constant.MemberRole;
-import com.y2gcoder.app.global.config.jwt.constant.ClaimKeyType;
-import com.y2gcoder.app.global.config.jwt.constant.GrantType;
-import com.y2gcoder.app.global.config.jwt.constant.TokenType;
-import com.y2gcoder.app.global.config.jwt.dto.JwtTokenDto;
+import com.y2gcoder.app.global.jwt.constant.ClaimKeyType;
+import com.y2gcoder.app.global.jwt.constant.GrantType;
+import com.y2gcoder.app.global.jwt.constant.TokenType;
+import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
 import com.y2gcoder.app.global.config.security.dto.CustomUserDetails;
 import io.jsonwebtoken.*;

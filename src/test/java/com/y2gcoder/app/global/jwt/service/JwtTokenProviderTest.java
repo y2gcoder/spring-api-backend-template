@@ -1,4 +1,4 @@
-package com.y2gcoder.app.global.config.jwt.service;
+package com.y2gcoder.app.global.jwt.service;
 
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.global.config.PropertiesConfiguration;

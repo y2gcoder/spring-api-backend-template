@@ -2,8 +2,8 @@ package com.y2gcoder.app.global.config.security.handler;
 
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.service.MemberService;
-import com.y2gcoder.app.global.config.jwt.dto.JwtTokenDto;
-import com.y2gcoder.app.global.config.jwt.service.JwtTokenProvider;
+import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
+import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
 import com.y2gcoder.app.global.config.security.dto.CustomUserDetails;
 import com.y2gcoder.app.global.config.security.repository.CustomAuthorizationRequestRepository;

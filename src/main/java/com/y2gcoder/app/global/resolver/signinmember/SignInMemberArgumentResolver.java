@@ -1,8 +1,8 @@
 package com.y2gcoder.app.global.resolver.signinmember;
 
 import com.y2gcoder.app.domain.member.constant.MemberRole;
-import com.y2gcoder.app.global.config.jwt.constant.ClaimKeyType;
-import com.y2gcoder.app.global.config.jwt.service.JwtTokenProvider;
+import com.y2gcoder.app.global.jwt.constant.ClaimKeyType;
+import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
 import com.y2gcoder.app.global.util.JwtUtils;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
