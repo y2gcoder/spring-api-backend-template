@@ -18,11 +18,24 @@ public class MemberService {
 	private final MemberRepository memberRepository;
 
 	@Transactional
-	public void updateRefreshToken(Long memberId, String refreshToken, LocalDateTime refreshTokenExpireTime) {
-		Member member = memberRepository
+	public void registerMember(Member member) {
+		memberRepository.save(member);
+	}
+
+	public Member findMemberById(Long memberId) {
+		return memberRepository
 				.findById(memberId)
 				.orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
-		member.updateRefreshToken(refreshToken, refreshTokenExpireTime);
+	}
+
+	public boolean existsMemberByEmail(String email) {
+		return memberRepository.existsByEmail(email);
+	}
+
+	public Member findMemberByEmail(String email) {
+		return memberRepository
+				.findByEmail(email)
+				.orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
 	}
 
 	public Member findMemberByRefreshToken(String refreshToken) {
@@ -37,24 +50,12 @@ public class MemberService {
 		return member;
 	}
 
-	public Member findMemberById(Long memberId) {
-		return memberRepository
+	@Transactional
+	public void updateRefreshToken(Long memberId, String refreshToken, LocalDateTime refreshTokenExpireTime) {
+		Member member = memberRepository
 				.findById(memberId)
 				.orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
-	}
-
-	public boolean existsMemberByEmail(String email) {
-		return memberRepository.existsByEmail(email);
-	}
-
-	public void registerMember(Member member) {
-		memberRepository.save(member);
-	}
-
-	public Member findMemberByEmail(String email) {
-		return memberRepository
-				.findByEmail(email)
-				.orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOT_FOUND_MEMBER));
+		member.updateRefreshToken(refreshToken, refreshTokenExpireTime);
 	}
 
 	@Transactional
