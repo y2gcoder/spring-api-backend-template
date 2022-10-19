@@ -4,6 +4,7 @@ package com.y2gcoder.app.api.auth.service.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.Email;
@@ -24,7 +25,8 @@ public class SignInDto {
 		private String password;
 	}
 
-	@Getter @Builder
+	@Getter @Setter
+	@NoArgsConstructor
 	public static class Response {
 
 		private String grantType;
@@ -33,5 +35,12 @@ public class SignInDto {
 
 		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
 		private LocalDateTime accessTokenExpireTime;
+
+		@Builder
+		public Response(String grantType, String accessToken, LocalDateTime accessTokenExpireTime) {
+			this.grantType = grantType;
+			this.accessToken = accessToken;
+			this.accessTokenExpireTime = accessTokenExpireTime;
+		}
 	}
 }
