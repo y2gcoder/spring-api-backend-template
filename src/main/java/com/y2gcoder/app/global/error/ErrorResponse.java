@@ -1,17 +1,25 @@
 package com.y2gcoder.app.global.error;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.util.List;
 
 @Getter
-@Builder
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ErrorResponse {
 	private String errorCode;
 	private String errorMessage;
+
+	@Builder
+	public ErrorResponse(String errorCode, String errorMessage) {
+		this.errorCode = errorCode;
+		this.errorMessage = errorMessage;
+	}
 
 	public static ErrorResponse of(String errorCode, String errorMessage) {
 		return ErrorResponse.builder()
