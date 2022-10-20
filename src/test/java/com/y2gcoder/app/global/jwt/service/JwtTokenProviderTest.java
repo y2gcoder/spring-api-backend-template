@@ -3,6 +3,7 @@ package com.y2gcoder.app.global.jwt.service;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.global.config.PropertiesConfiguration;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
+import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.security.dto.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,8 +17,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,6 +64,24 @@ class JwtTokenProviderTest {
 
 		//then
 		assertThat(jwtTokenProvider.validateToken(accessToken)).isTrue();
+	}
+
+	@Test
+	@DisplayName("JwtTokenProvider: createJwtToken, 짧은 시간에 10회 반복시 똑같은 토큰 반환됨.")
+	void whenCreateJwtTokenFor10times_thenDuplicateToken() {
+		//given
+		String memberId = String.valueOf(1L);
+		MemberRole memberRole = MemberRole.USER;
+		//when
+		List<JwtTokenDto> list = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(memberId, memberRole);
+			list.add(jwtTokenDto);
+		}
+		//then
+		Set<String> resultSet = list.stream().map(JwtTokenDto::getAccessToken).collect(Collectors.toSet());
+		assertThat(list.size()).isGreaterThan(resultSet.size());
+
 	}
 
 	@Test
