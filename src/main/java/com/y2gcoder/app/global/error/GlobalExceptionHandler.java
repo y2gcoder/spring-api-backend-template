@@ -4,6 +4,7 @@ import com.y2gcoder.app.global.error.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingRequestCookieException;
@@ -13,6 +14,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+	@ExceptionHandler(AccessDeniedException.class)
+	protected ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+		log.error("AccessDeniedException", e);
+		ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.FORBIDDEN.toString(), e.getMessage());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+	}
 
 	/**
 	 * 필요한 Cookie가 없을 때 예외(Refresh Token이 유력)
