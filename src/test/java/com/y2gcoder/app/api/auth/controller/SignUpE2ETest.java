@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @SpringBootTest
-class AuthControllerE2ETest {
+class SignUpE2ETest {
 
 	@Autowired
 	private MockMvc mockMvc;
