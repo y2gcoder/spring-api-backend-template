@@ -6,6 +6,7 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.service.MemberService;
+import com.y2gcoder.app.global.error.exception.EntityNotFoundException;
 import com.y2gcoder.app.global.jwt.constant.GrantType;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
@@ -28,8 +29,7 @@ import java.util.Date;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -164,26 +164,25 @@ class AuthServiceTest {
 	void whenSignOut_thenSuccess() {
 		//given
 		Member member = createMemberWithRefreshToken();
-		doReturn(true).when(jwtTokenProvider).validateToken(member.getRefreshToken());
-		doReturn(member).when(memberService).findMemberByRefreshToken(member.getRefreshToken());
+		doReturn(member).when(memberService).findMemberById(anyLong());
 
 		//when
-		authService.signOut("refresh");
+		authService.signOut(1L);
 
 		//then
-		verify(memberService).findMemberByRefreshToken("refresh");
+		verify(memberService).findMemberById(1L);
 	}
 
 	@Test
-	@DisplayName("AuthService: 로그아웃, 토큰 유효성 검사 실패")
-	void givenInvalidRefreshToken_whenSignOut_thenThrowAuthenticationException() {
+	@DisplayName("AuthService: 로그아웃, 해당 멤버 ID로 멤버를 찾을 수 없음.")
+	void givenInvalidMemberId_whenSignOut_thenNotFoundMember() {
 		//given
-		doReturn(false).when(jwtTokenProvider).validateToken(anyString());
+		doThrow(EntityNotFoundException.class).when(memberService).findMemberById(anyLong());
+
 		//when
 		//then
-		assertThatThrownBy(() -> authService.signOut("refresh"))
-				.isInstanceOf(AuthenticationException.class)
-				.hasMessage(ErrorCode.INVALID_REFRESH_TOKEN.getMessage());
+		assertThatThrownBy(() -> authService.signOut(1L))
+				.isInstanceOf(EntityNotFoundException.class);
 	}
 
 	private SignUpRequest createSignUpRequest() {

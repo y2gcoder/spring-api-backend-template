@@ -6,8 +6,11 @@ import com.y2gcoder.app.api.auth.service.AuthService;
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
 import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
+import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.global.jwt.constant.GrantType;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
+import com.y2gcoder.app.global.resolver.signinmember.SignInMemberArgumentResolver;
+import com.y2gcoder.app.global.resolver.signinmember.SignInMemberDto;
 import com.y2gcoder.app.global.util.CookieUtils;
 import com.y2gcoder.app.global.util.RefreshTokenCookieUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +48,9 @@ class AuthControllerTest {
 	@Mock
 	private RefreshTokenCookieUtils refreshTokenCookieUtils;
 
+	@Mock
+	private SignInMemberArgumentResolver signInMemberArgumentResolver;
+
 	private MockMvc mockMvc;
 	private ObjectMapper objectMapper;
 
@@ -54,6 +60,7 @@ class AuthControllerTest {
 	public void beforeEach() {
 		mockMvc = MockMvcBuilders
 				.standaloneSetup(authController)
+				.setCustomArgumentResolvers(signInMemberArgumentResolver)
 				.build();
 		objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 	}
@@ -178,20 +185,26 @@ class AuthControllerTest {
 	@DisplayName("AuthController(단위): 로그아웃, 성공")
 	void whenSignOut_thenSuccess() throws Exception {
 		//given
-		String refreshToken = "refresh";
+		Long memberId = 1L;
+		SignInMemberDto signInMemberDto = SignInMemberDto.builder()
+				.memberId(memberId)
+				.role(MemberRole.USER)
+				.build();
+		doReturn(true).when(signInMemberArgumentResolver).supportsParameter(any());
+		doReturn(signInMemberDto).when(signInMemberArgumentResolver).resolveArgument(any(), any(), any(), any());
 		ResponseCookie signOutCookie = createSignOutCookie();
 		doReturn(signOutCookie).when(refreshTokenCookieUtils).generateSignOutCookie();
+
 		//when
-		ResponseCookie requestRefreshTokenCookie = createRefreshTokenCookie(refreshToken);
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.post("/api/auth/sign-out")
-						.cookie(new Cookie(requestRefreshTokenCookie.getName(), requestRefreshTokenCookie.getValue()))
 		);
-		//then
-		verify(authService).signOut(refreshToken);
+
+		verify(authService).signOut(memberId);
 		MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
 		Cookie resultCookie = mvcResult.getResponse().getCookie(REFRESH_TOKEN_COOKIE_NAME);
 		assertThat(resultCookie.getMaxAge()).isEqualTo(1);
+
 	}
 
 	private ResponseCookie createSignOutCookie() {

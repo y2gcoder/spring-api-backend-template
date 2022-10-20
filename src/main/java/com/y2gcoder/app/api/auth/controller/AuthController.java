@@ -5,6 +5,8 @@ import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
 import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
+import com.y2gcoder.app.global.resolver.signinmember.SignInMember;
+import com.y2gcoder.app.global.resolver.signinmember.SignInMemberDto;
 import com.y2gcoder.app.global.util.RefreshTokenCookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -63,9 +65,9 @@ public class AuthController {
 	}
 
 	@PostMapping("/sign-out")
-	public ResponseEntity<Void> signOut(@CookieValue("refreshtoken") String refreshToken) {
+	public ResponseEntity<Void> signOut(@SignInMember SignInMemberDto signInMemberDto) {
 
-		authService.signOut(refreshToken);
+		authService.signOut(signInMemberDto.getMemberId());
 
 		ResponseCookie signOutCookie = refreshTokenCookieUtils.generateSignOutCookie();
 

@@ -6,17 +6,15 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.service.MemberService;
-import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
-import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.error.exception.BusinessException;
+import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
+import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -84,19 +82,16 @@ public class AuthService {
 		return jwtTokenDto;
 	}
 
-	@Transactional
-	public void signOut(String refreshToken) {
-
-		validateRefreshToken(refreshToken);
-		Member member = memberService.findMemberByRefreshToken(refreshToken);
-
-		member.updateRefreshToken("", LocalDateTime.now());
-	}
-
 	private void validateRefreshToken(String refreshToken) {
 		boolean validateToken = jwtTokenProvider.validateToken(refreshToken);
 		if (!validateToken) {
 			throw new AuthenticationException(ErrorCode.INVALID_REFRESH_TOKEN);
 		}
+	}
+
+	@Transactional
+	public void signOut(Long memberId) {
+		Member member = memberService.findMemberById(memberId);
+		member.updateRefreshToken("", null);
 	}
 }
