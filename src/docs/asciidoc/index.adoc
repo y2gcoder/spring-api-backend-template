@@ -21,3 +21,27 @@ include::{snippets}/health-check/http-request.adoc[]
 include::{snippets}/health-check/http-response.adoc[]
 
 include::{snippets}/health-check/response-fields.adoc[]
+
+[[resources-auth]]
+== Auth
+
+[[resources-auth-sign-up]]
+=== Sign Up
+
+==== HTTP Request
+
+include::{snippets}/sign-up/http-request.adoc[]
+
+==== HTTP Response
+
+===== 성공
+
+include::{snippets}/sign-up/http-response.adoc[]
+
+===== 실패 (유효성 검사 에러)
+
+include::{snippets}/sign-up-fail-invalid-email/http-response.adoc[]
+
+===== 실패 (회원 이메일이 존재함)
+
+include::{snippets}/sign-up-fail-already-email-exists/http-response.adoc[]
