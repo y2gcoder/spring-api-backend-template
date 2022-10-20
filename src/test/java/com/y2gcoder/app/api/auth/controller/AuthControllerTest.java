@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.y2gcoder.app.api.auth.service.AuthService;
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
+import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
 import com.y2gcoder.app.global.jwt.constant.GrantType;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.util.CookieUtils;
@@ -136,10 +137,11 @@ class AuthControllerTest {
 		);
 		//then
 		MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
-		JwtTokenDto result = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), JwtTokenDto.class);
+		TokenRefreshResponse response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TokenRefreshResponse.class);
+		assertThat(response.getAccessToken()).isNotBlank();
 		Cookie resultCookie = mvcResult.getResponse().getCookie(REFRESH_TOKEN_COOKIE_NAME);
-		assertThat(result.getRefreshToken()).isEqualTo(newRefreshToken);
 		assertThat(resultCookie).isNotNull();
+		assertThat(resultCookie.getValue()).isEqualTo(newRefreshToken);
 		assertThat(resultCookie.getMaxAge()).isEqualTo(3600);
 	}
 

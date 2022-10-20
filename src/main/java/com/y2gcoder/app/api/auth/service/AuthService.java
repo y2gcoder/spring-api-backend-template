@@ -78,9 +78,7 @@ public class AuthService {
 
 		validateRefreshToken(refreshToken);
 		Member member = memberService.findMemberByRefreshToken(refreshToken);
-
 		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
-
 		member.updateRefreshToken(jwtTokenDto.getRefreshToken(), jwtTokenDto.getRefreshTokenExpireTime());
 
 		return jwtTokenDto;

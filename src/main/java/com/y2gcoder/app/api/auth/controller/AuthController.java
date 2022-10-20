@@ -3,6 +3,7 @@ package com.y2gcoder.app.api.auth.controller;
 import com.y2gcoder.app.api.auth.service.AuthService;
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
+import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.util.RefreshTokenCookieUtils;
 import lombok.RequiredArgsConstructor;
@@ -44,14 +45,20 @@ public class AuthController {
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<JwtTokenDto> refreshToken(@CookieValue("refreshtoken") String refreshToken) {
+	public ResponseEntity<TokenRefreshResponse> refreshToken(@CookieValue("refreshtoken") String refreshToken) {
 
 		JwtTokenDto jwtTokenDto = authService.refreshToken(refreshToken);
 
 		String refreshTokenCookie = refreshTokenCookieUtils
 				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
 
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie).body(jwtTokenDto);
+		TokenRefreshResponse response = TokenRefreshResponse.builder()
+				.grantType(jwtTokenDto.getGrantType())
+				.accessToken(jwtTokenDto.getAccessToken())
+				.accessTokenExpireTime(jwtTokenDto.getAccessTokenExpireTime())
+				.build();
+
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie).body(response);
 	}
 
 	@PostMapping("/sign-out")
