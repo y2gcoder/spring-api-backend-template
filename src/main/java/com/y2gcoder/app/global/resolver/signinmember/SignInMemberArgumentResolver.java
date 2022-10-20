@@ -7,6 +7,7 @@ import com.y2gcoder.app.global.util.JwtUtils;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -31,7 +32,7 @@ public class SignInMemberArgumentResolver implements HandlerMethodArgumentResolv
 	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 		HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-		String authorizationHeader = request.getHeader("Authorization");
+		String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		String jwt = JwtUtils.getTokenFromRequest(authorizationHeader);
 
 		Claims claims = jwtTokenProvider.parseClaims(jwt);

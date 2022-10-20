@@ -4,6 +4,7 @@ import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
 import com.y2gcoder.app.global.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		String authorizationHeader = request.getHeader("Authorization");
+		String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		String jwt = JwtUtils.getTokenFromRequest(authorizationHeader);
 
 		if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
