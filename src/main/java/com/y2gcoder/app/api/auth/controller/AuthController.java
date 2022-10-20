@@ -9,6 +9,7 @@ import com.y2gcoder.app.global.util.RefreshTokenCookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,10 +39,10 @@ public class AuthController {
 				.build();
 
 		//Cookie에 refresh token 저장!!
-		String refreshTokenCookie = refreshTokenCookieUtils
+		ResponseCookie refreshTokenCookie = refreshTokenCookieUtils
 				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
 
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie).body(result);
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString()).body(result);
 	}
 
 	@PostMapping("/refresh")
@@ -49,7 +50,7 @@ public class AuthController {
 
 		JwtTokenDto jwtTokenDto = authService.refreshToken(refreshToken);
 
-		String refreshTokenCookie = refreshTokenCookieUtils
+		ResponseCookie refreshTokenCookie = refreshTokenCookieUtils
 				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
 
 		TokenRefreshResponse response = TokenRefreshResponse.builder()
@@ -58,7 +59,7 @@ public class AuthController {
 				.accessTokenExpireTime(jwtTokenDto.getAccessTokenExpireTime())
 				.build();
 
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie).body(response);
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString()).body(response);
 	}
 
 	@PostMapping("/sign-out")
@@ -66,9 +67,9 @@ public class AuthController {
 
 		authService.signOut(refreshToken);
 
-		String signOutCookie = refreshTokenCookieUtils.generateSignOutCookie();
+		ResponseCookie signOutCookie = refreshTokenCookieUtils.generateSignOutCookie();
 
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, signOutCookie).build();
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, signOutCookie.toString()).build();
 	}
 
 }

@@ -6,6 +6,7 @@ import com.y2gcoder.app.global.resolver.signinmember.SignInMemberDto;
 import com.y2gcoder.app.global.util.RefreshTokenCookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,8 +30,8 @@ public class MemberController {
 
 		//본인이라면 refresh token cookie도 삭제
 		if (isOwnerMember(id, signInMemberDto.getMemberId())) {
-			String signOutCookie = refreshTokenCookieUtils.generateSignOutCookie();
-			return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, signOutCookie).build();
+			ResponseCookie signOutCookie = refreshTokenCookieUtils.generateSignOutCookie();
+			return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, signOutCookie.toString()).build();
 		}
 
 		return ResponseEntity.ok().build();

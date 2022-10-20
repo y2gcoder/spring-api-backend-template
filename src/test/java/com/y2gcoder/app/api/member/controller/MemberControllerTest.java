@@ -1,6 +1,5 @@
 package com.y2gcoder.app.api.member.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.service.MemberService;
 import com.y2gcoder.app.global.resolver.signinmember.SignInMemberArgumentResolver;
@@ -92,7 +91,7 @@ class MemberControllerTest {
 		doReturn(true).when(signInMemberArgumentResolver).supportsParameter(any());
 		doReturn(signInMemberDto).when(signInMemberArgumentResolver).resolveArgument(any(), any(), any(), any());
 		ResponseCookie signOutCookie = createSignOutCookie();
-		doReturn(signOutCookie.toString()).when(refreshTokenCookieUtils).generateSignOutCookie();
+		doReturn(signOutCookie).when(refreshTokenCookieUtils).generateSignOutCookie();
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.delete("/api/members/{id}", memberId)

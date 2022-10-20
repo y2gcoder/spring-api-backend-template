@@ -90,7 +90,7 @@ class AuthControllerTest {
 		SignInDto.Request request = createSignInRequest();
 		JwtTokenDto jwtTokenDto = createJwtTokenDto();
 		doReturn(jwtTokenDto).when(authService).signIn(any(SignInDto.Request.class));
-		doReturn(createRefreshTokenCookie(jwtTokenDto.getRefreshToken()).toString())
+		doReturn(createRefreshTokenCookie(jwtTokenDto.getRefreshToken()))
 				.when(refreshTokenCookieUtils)
 				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
 		//when
@@ -125,7 +125,7 @@ class AuthControllerTest {
 		JwtTokenDto jwtTokenDto = createJwtTokenDtoWithNewRefreshToken(newRefreshToken);
 		doReturn(jwtTokenDto).when(authService).refreshToken(refreshToken);
 		ResponseCookie refreshTokenCookie = createRefreshTokenCookie(jwtTokenDto.getRefreshToken());
-		doReturn(refreshTokenCookie.toString())
+		doReturn(refreshTokenCookie)
 				.when(refreshTokenCookieUtils)
 				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
 
@@ -180,7 +180,7 @@ class AuthControllerTest {
 		//given
 		String refreshToken = "refresh";
 		ResponseCookie signOutCookie = createSignOutCookie();
-		doReturn(signOutCookie.toString()).when(refreshTokenCookieUtils).generateSignOutCookie();
+		doReturn(signOutCookie).when(refreshTokenCookieUtils).generateSignOutCookie();
 		//when
 		ResponseCookie requestRefreshTokenCookie = createRefreshTokenCookie(refreshToken);
 		ResultActions resultActions = mockMvc.perform(
