@@ -104,7 +104,7 @@ class SignOutE2ETest {
 	}
 
 	@Test
-	@DisplayName("AuthController(E2E): 액세스 토큰이 없을 때")
+	@DisplayName("AuthController(E2E): 로그아웃, 액세스 토큰이 없을 때")
 	void givenNotFoundAccessToken_whenSignOut_thenFail() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
@@ -134,7 +134,7 @@ class SignOutE2ETest {
 	}
 
 	@Test
-	@DisplayName("AuthController(E2E): 윺효하지 않은 액세스토큰")
+	@DisplayName("AuthController(E2E): 로그아웃, 윺효하지 않은 액세스토큰")
 	void givenInvalidAccessToken_whenSignOut_thenFail() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
