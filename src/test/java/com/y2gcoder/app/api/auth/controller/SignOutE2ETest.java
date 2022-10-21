@@ -173,13 +173,6 @@ class SignOutE2ETest {
 		return request;
 	}
 
-	private Cookie createRefreshTokenCookie(String refreshToken) {
-		Cookie cookie = new Cookie(oAuth2Config.getAuth().getRefreshCookieKey(), refreshToken);
-		cookie.setPath("/");
-		cookie.setMaxAge((int) (oAuth2Config.getAuth().getRefreshTokenValidityInMs() / 1000));
-		return cookie;
-	}
-
 	private static String createAuthorizationHeaderValue(JwtTokenDto jwtTokenDto) {
 		return jwtTokenDto.getGrantType() + " " + jwtTokenDto.getAccessToken();
 	}
