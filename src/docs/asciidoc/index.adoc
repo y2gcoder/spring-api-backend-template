@@ -13,66 +13,123 @@
 === Health Check
 
 ==== HTTP Request
-
 include::{snippets}/health-check/http-request.adoc[]
 
 ==== HTTP Response
-
 include::{snippets}/health-check/http-response.adoc[]
-
 include::{snippets}/health-check/response-fields.adoc[]
 
 [[resources-auth]]
 == Auth
 
 [[resources-auth-sign-up]]
-=== Sign Up
+=== 회원가입
 
 ==== HTTP Request
-
 include::{snippets}/sign-up/http-request.adoc[]
 
 ==== HTTP Response
 
 ===== 성공
-
 include::{snippets}/sign-up/http-response.adoc[]
 
 ===== 실패 (유효성 검사 에러)
-
 include::{snippets}/sign-up-fail-invalid-email/http-response.adoc[]
 
 ===== 실패 (회원 이메일이 존재함)
-
 include::{snippets}/sign-up-fail-already-email-exists/http-response.adoc[]
 
 [[resources-auth-sign-in]]
-=== Sign In
+=== 로그인
 
 ==== HTTP Request
-
 include::{snippets}/sign-in/http-request.adoc[]
 
 ==== HTTP Response
 
 ===== 성공
-
 include::{snippets}/sign-in/http-response.adoc[]
-
 include::{snippets}/sign-in/response-fields.adoc[]
 
 ===== 실패(유효성 검사)
-
 include::{snippets}/sign-in-fail-invalid-email/http-response.adoc[]
 
 ===== 실패(회원 이메일 아님)
-
 include::{snippets}/sign-in-fail-not-exists-email/http-response.adoc[]
 
 ===== 실패(소셜 로그인 회원)
-
 include::{snippets}/sign-in-fail-social-member/http-response.adoc[]
 
 ===== 실패(비밀번호 불일치)
-
 include::{snippets}/sign-in-fail-mismatch-password/http-response.adoc[]
+
+[[resources-auth-token-refresh]]
+=== 토큰 갱신
+
+==== HTTP Request
+include::{snippets}/token-refresh/http-request.adoc[]
+
+==== HTTP Response
+
+===== 성공
+include::{snippets}/token-refresh/http-response.adoc[]
+include::{snippets}/token-refresh/response-fields.adoc[]
+
+===== 실패(리프레시 토큰 없음)
+include::{snippets}/token-refresh-fail-not-exists-cookie/http-response.adoc[]
+
+===== 실패(유효하지 않은 리프레시 토큰)
+include::{snippets}/token-refresh-fail-invalid-refresh-token/http-response.adoc[]
+
+===== 실패(해당 리프레시 토큰으로 회원을 찾을 수 없음)
+include::{snippets}/token-refresh-fail-not-found-member-by-refresh-token/http-response.adoc[]
+
+===== 실패(해당 회원의 리프레시 토큰이 만료됨(DB에서)
+include::{snippets}/token-refresh-fail-not-found-member-by-expired-refresh-token-from-db/http-response.adoc[]
+
+
+[[resources-auth-sign-out]]
+=== 로그아웃
+
+==== HTTP Request
+include::{snippets}/sign-out/http-request.adoc[]
+
+==== HTTP Response
+
+===== 성공
+include::{snippets}/sign-out/http-response.adoc[]
+
+[[resources-member]]
+== Member
+
+[[resources-member-withdraw]]
+=== 회원 탈퇴
+
+==== HTTP Request
+include::{snippets}/withdraw-member/http-request.adoc[]
+
+==== HTTP Response
+
+===== 성공
+include::{snippets}/withdraw-member/http-response.adoc[]
+
+===== 실패(자기 자신이 아닌 사람을 탈퇴하려고 시도)
+include::{snippets}/withdraw-member-fail-another-normal-member/http-response.adoc[]
+
+[[resources-member-who-am-I]]
+=== 내 정보 조회
+
+==== HTTP Request
+include::{snippets}/who-am-I/http-request.adoc[]
+
+==== HTTP Response
+
+===== 성공
+include::{snippets}/who-am-I/http-response.adoc[]
+
+[[resources-common-response]]
+== 공통 응답
+
+[[resources-common-response-invalid-access-toekn]]
+=== 액세스 토큰이 없음/유효하지 않은 액세스 토큰
+include::{snippets}/who-am-I-fail-invalid-access-token/http-response.adoc[]
