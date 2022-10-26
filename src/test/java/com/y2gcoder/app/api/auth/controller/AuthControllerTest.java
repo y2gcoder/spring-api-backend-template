@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import javax.servlet.http.Cookie;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,7 +98,7 @@ class AuthControllerTest {
 		SignInDto.Request request = createSignInRequest();
 		JwtTokenDto jwtTokenDto = createJwtTokenDto();
 		doReturn(jwtTokenDto).when(authService).signIn(any(SignInDto.Request.class));
-		doReturn(createRefreshTokenCookie(jwtTokenDto.getRefreshToken()))
+		doReturn(createResponseRefreshTokenCookie(jwtTokenDto.getRefreshToken()))
 				.when(refreshTokenCookieUtils)
 				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
 		//when
@@ -123,33 +124,47 @@ class AuthControllerTest {
 		return request;
 	}
 
+	private ResponseCookie createResponseRefreshTokenCookie(String refreshToken) {
+		return CookieUtils
+				.generateResponseCookie(
+						REFRESH_TOKEN_COOKIE_NAME,
+						refreshToken,
+						3600
+				);
+	}
+
 	@Test
 	@DisplayName("AuthController(단위): 토큰 리프레시, 성공")
 	void whenRefreshToken_thenSuccess() throws Exception {
 		//given
 		String refreshToken = "refresh";
-		String newRefreshToken = "newRefresh";
-		JwtTokenDto jwtTokenDto = createJwtTokenDtoWithNewRefreshToken(newRefreshToken);
-		doReturn(jwtTokenDto).when(authService).refreshToken(refreshToken);
-		ResponseCookie refreshTokenCookie = createRefreshTokenCookie(jwtTokenDto.getRefreshToken());
-		doReturn(refreshTokenCookie)
-				.when(refreshTokenCookieUtils)
-				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
+		Cookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
+		String newAccessToken = "newAccess";
+		LocalDateTime expireTime = LocalDateTime.now();
+		TokenRefreshResponse tokenRefreshResponse = createTokenRefreshResponse(newAccessToken, expireTime);
+		doReturn(tokenRefreshResponse).when(authService).refreshToken(refreshToken);
 
 		//when
-		ResponseCookie requestRefreshTokenCookie = createRefreshTokenCookie(refreshToken);
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.post("/api/auth/refresh")
-						.cookie(new Cookie(requestRefreshTokenCookie.getName(), requestRefreshTokenCookie.getValue()))
+						.cookie(refreshTokenCookie)
 		);
+
 		//then
 		MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
-		TokenRefreshResponse response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TokenRefreshResponse.class);
-		assertThat(response.getAccessToken()).isNotBlank();
-		Cookie resultCookie = mvcResult.getResponse().getCookie(REFRESH_TOKEN_COOKIE_NAME);
-		assertThat(resultCookie).isNotNull();
-		assertThat(resultCookie.getValue()).isEqualTo(newRefreshToken);
-		assertThat(resultCookie.getMaxAge()).isEqualTo(3600);
+		TokenRefreshResponse response = objectMapper
+				.readValue(mvcResult.getResponse().getContentAsString(), TokenRefreshResponse.class);
+
+		assertThat(response.getAccessToken()).isEqualTo(newAccessToken);
+		assertThat(response.getAccessTokenExpireTime()).isEqualToIgnoringNanos(expireTime);
+	}
+
+	private TokenRefreshResponse createTokenRefreshResponse(String accessToken, LocalDateTime expireTime) {
+		return TokenRefreshResponse.builder()
+				.grantType(GrantType.BEARER.getType())
+				.accessToken(accessToken)
+				.accessTokenExpireTime(expireTime)
+				.build();
 	}
 
 	private JwtTokenDto createJwtTokenDto() {
@@ -162,23 +177,11 @@ class AuthControllerTest {
 				.build();
 	}
 
-	private JwtTokenDto createJwtTokenDtoWithNewRefreshToken(String newRefreshToken) {
-		return JwtTokenDto.builder()
-				.grantType(GrantType.BEARER.getType())
-				.accessToken("access")
-				.accessTokenExpireTime(new Date())
-				.refreshToken(newRefreshToken)
-				.refreshTokenExpireTime(new Date())
-				.build();
-	}
-
-	private ResponseCookie createRefreshTokenCookie(String refreshToken) {
-		return CookieUtils
-				.generateResponseCookie(
-						REFRESH_TOKEN_COOKIE_NAME,
-						refreshToken,
-						3600
-				);
+	private Cookie createRefreshTokenCookie(String refreshToken) {
+		Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
+		cookie.setPath("/");
+		cookie.setMaxAge(3600);
+		return cookie;
 	}
 
 	@Test

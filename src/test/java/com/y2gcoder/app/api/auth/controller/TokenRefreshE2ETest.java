@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.y2gcoder.app.api.auth.service.AuthService;
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
+import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
 import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
@@ -110,9 +111,9 @@ class TokenRefreshE2ETest {
 
 
 		MvcResult mvcResult = resultActions.andReturn();
-		Cookie cookie = mvcResult.getResponse().getCookie(oAuth2Config.getAuth().getRefreshCookieKey());
-		assertThat(cookie).isNotNull();
-		assertThat(cookie.getMaxAge()).isPositive();
+		TokenRefreshResponse response = objectMapper
+				.readValue(mvcResult.getResponse().getContentAsString(), TokenRefreshResponse.class);
+		assertThat(response.getAccessToken()).isNotBlank();
 	}
 
 	@Test

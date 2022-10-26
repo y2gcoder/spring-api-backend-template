@@ -2,6 +2,7 @@ package com.y2gcoder.app.api.auth.service;
 
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
+import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
 import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
@@ -13,6 +14,7 @@ import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.error.exception.BusinessException;
+import com.y2gcoder.app.global.util.DateTimeUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -121,7 +123,7 @@ class AuthServiceTest {
 	}
 
 	@Test
-	@DisplayName("AuthService: 토큰 리프레시, 성공")
+	@DisplayName("AuthService: 토큰 재발급, 성공")
 	void whenRefreshToken_thenSuccess() {
 		//given
 		Member member = createMemberWithRefreshToken();
@@ -129,22 +131,19 @@ class AuthServiceTest {
 		doReturn(member).when(memberService).findMemberByRefreshToken(member.getRefreshToken());
 		String newAccessToken = "newAccess";
 		LocalDateTime newAccessTokenExpireTime = LocalDateTime.now().plusMinutes(15L);
-		String newRefreshToken = "newRefresh";
-		LocalDateTime newRefreshTokenExpireTime = LocalDateTime.now().plusWeeks(2L);
-		JwtTokenDto updatedJwtTokenDto = createJwtTokenDto(
-				newAccessToken,
-				newAccessTokenExpireTime,
-				newRefreshToken,
-				newRefreshTokenExpireTime
-		);
-		doReturn(updatedJwtTokenDto).when(jwtTokenProvider).createJwtToken(anyString(), any());
+		Date newAccessTokenExpireTimeToDate = convertLocalDateTimeToDate(newAccessTokenExpireTime);
+		doReturn(newAccessTokenExpireTimeToDate).when(jwtTokenProvider).createAccessTokenExpireTime();
+
+		doReturn(newAccessToken)
+				.when(jwtTokenProvider).createAccessToken(anyString(), any(), any());
 
 		//when
-		JwtTokenDto result = authService.refreshToken("refresh");
+		TokenRefreshResponse response = authService.refreshToken("refresh");
 
 		//then
-		assertThat(result.getRefreshToken()).isEqualTo(member.getRefreshToken());
-		assertThat(result.getRefreshTokenExpireTime()).isEqualTo(member.getTokenExpirationTime());
+		assertThat(response.getAccessToken()).isEqualTo(newAccessToken);
+		assertThat(response.getAccessTokenExpireTime())
+				.isEqualTo(DateTimeUtils.convertToLocalDateTime(newAccessTokenExpireTimeToDate));
 	}
 
 	@Test

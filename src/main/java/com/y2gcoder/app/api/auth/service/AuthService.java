@@ -2,6 +2,7 @@ package com.y2gcoder.app.api.auth.service;
 
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
+import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
 import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
@@ -9,12 +10,16 @@ import com.y2gcoder.app.domain.member.service.MemberService;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.error.exception.BusinessException;
+import com.y2gcoder.app.global.jwt.constant.GrantType;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
+import com.y2gcoder.app.global.util.DateTimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -71,15 +76,17 @@ public class AuthService {
 		}
 	}
 
-	@Transactional
-	public JwtTokenDto refreshToken(String refreshToken) {
-
+	public TokenRefreshResponse refreshToken(String refreshToken) {
 		validateRefreshToken(refreshToken);
 		Member member = memberService.findMemberByRefreshToken(refreshToken);
-		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
-		member.updateRefreshToken(jwtTokenDto.getRefreshToken(), jwtTokenDto.getRefreshTokenExpireTime());
-
-		return jwtTokenDto;
+		Date accessTokenExpireTime = jwtTokenProvider.createAccessTokenExpireTime();
+		String accessToken =
+				jwtTokenProvider.createAccessToken(String.valueOf(member.getId()), member.getRole(), accessTokenExpireTime);
+		return TokenRefreshResponse.builder()
+				.grantType(GrantType.BEARER.getType())
+				.accessToken(accessToken)
+				.accessTokenExpireTime(DateTimeUtils.convertToLocalDateTime(accessTokenExpireTime))
+				.build();
 	}
 
 	private void validateRefreshToken(String refreshToken) {

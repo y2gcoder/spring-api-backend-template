@@ -50,18 +50,8 @@ public class AuthController {
 	@PostMapping("/refresh")
 	public ResponseEntity<TokenRefreshResponse> refreshToken(@CookieValue("refreshtoken") String refreshToken) {
 
-		JwtTokenDto jwtTokenDto = authService.refreshToken(refreshToken);
-
-		ResponseCookie refreshTokenCookie = refreshTokenCookieUtils
-				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
-
-		TokenRefreshResponse response = TokenRefreshResponse.builder()
-				.grantType(jwtTokenDto.getGrantType())
-				.accessToken(jwtTokenDto.getAccessToken())
-				.accessTokenExpireTime(jwtTokenDto.getAccessTokenExpireTime())
-				.build();
-
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString()).body(response);
+		TokenRefreshResponse response = authService.refreshToken(refreshToken);
+		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping("/sign-out")

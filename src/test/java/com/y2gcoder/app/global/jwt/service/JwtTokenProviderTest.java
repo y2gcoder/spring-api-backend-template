@@ -40,18 +40,6 @@ class JwtTokenProviderTest {
 	}
 
 	@Test
-	@DisplayName("JwtTokenProvider: createAccessTokenExpireTime, 성공")
-	void whenCreateAccessTokenExpireTime_thenReturnDate() {
-		//given
-		//when
-		Date result = jwtTokenProvider.createAccessTokenExpireTime();
-		//then
-		assertThat(result).isInstanceOf(Date.class);
-		assertThat(result)
-				.isEqualToIgnoringMillis(new Date(new Date().getTime() + oAuth2Config.getAuth().getAccessTokenValidityInMs()));
-	}
-
-	@Test
 	@DisplayName("JwtTokenProvider: createAccessToken, 유효한 토큰")
 	void whenCreateAccessToken_thenValidToken() {
 		//given
