@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		String jwt = JwtUtils.getTokenFromRequest(authorizationHeader);
 
-		if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
+		if (StringUtils.hasText(jwt) && jwtTokenProvider.validateAccessToken(jwt)) {
 			UsernamePasswordAuthenticationToken authentication = jwtTokenProvider.getAuthentication(jwt);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			log.debug("JWT로 {}의 인증정보 저장", authentication.getName());

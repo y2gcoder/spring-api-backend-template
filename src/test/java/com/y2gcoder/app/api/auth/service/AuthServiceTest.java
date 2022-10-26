@@ -125,7 +125,7 @@ class AuthServiceTest {
 	void whenRefreshToken_thenSuccess() {
 		//given
 		Member member = createMemberWithRefreshToken();
-		doReturn(true).when(jwtTokenProvider).validateToken(member.getRefreshToken());
+		doReturn(true).when(jwtTokenProvider).validateRefreshToken(member.getRefreshToken());
 		doReturn(member).when(memberService).findMemberByRefreshToken(member.getRefreshToken());
 		String newAccessToken = "newAccess";
 		LocalDateTime newAccessTokenExpireTime = LocalDateTime.now().plusMinutes(15L);
@@ -151,7 +151,7 @@ class AuthServiceTest {
 	@DisplayName("AuthService: 토큰 재발급, 토큰 유효성 검사 실패")
 	void givenInvalidRefreshToken_whenRefreshToken_thenThrowAuthenticationException() {
 		//given
-		doReturn(false).when(jwtTokenProvider).validateToken(anyString());
+		doReturn(false).when(jwtTokenProvider).validateRefreshToken(anyString());
 		//when
 		//then
 		assertThatThrownBy(() -> authService.refreshToken("invalid"))

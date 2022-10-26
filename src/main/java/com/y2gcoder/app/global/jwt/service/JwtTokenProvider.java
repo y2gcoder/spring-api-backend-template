@@ -79,7 +79,7 @@ public class JwtTokenProvider {
 				.compact();
 	}
 
-	public boolean validateToken(String token) {
+	private boolean validateToken(String token) {
 		try {
 			Jwts.parserBuilder().setSigningKey(createSecretKey()).build().parseClaimsJws(token)
 					.getBody().getExpiration();
@@ -94,6 +94,34 @@ public class JwtTokenProvider {
 			log.error("JWT 토큰이 잘못되었습니다.");
 		}
 		return false;
+	}
+
+	public boolean validateAccessToken(String jwt) {
+		if (!validateToken(jwt)) {
+			return false;
+		}
+
+		String subject = Jwts.parserBuilder()
+				.setSigningKey(createSecretKey()).build().parseClaimsJws(jwt).getBody().getSubject();
+		if (!TokenType.isAccessToken(subject)) {
+			log.error("Access Token이 아닙니다.");
+			return false;
+		}
+		return true;
+	}
+
+	public boolean validateRefreshToken(String jwt) {
+		if (!validateToken(jwt)) {
+			return false;
+		}
+
+		String subject = Jwts.parserBuilder()
+				.setSigningKey(createSecretKey()).build().parseClaimsJws(jwt).getBody().getSubject();
+		if (!TokenType.isRefreshToken(subject)) {
+			log.error("Refresh Token이 아닙니다.");
+			return false;
+		}
+		return true;
 	}
 
 	public UsernamePasswordAuthenticationToken getAuthentication(String accessToken) {

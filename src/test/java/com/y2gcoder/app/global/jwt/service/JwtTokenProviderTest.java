@@ -63,7 +63,7 @@ class JwtTokenProviderTest {
 		String accessToken = jwtTokenProvider.createAccessToken(memberId, memberRole, accessTokenExpireTime);
 
 		//then
-		assertThat(jwtTokenProvider.validateToken(accessToken)).isTrue();
+		assertThat(jwtTokenProvider.validateAccessToken(accessToken)).isTrue();
 	}
 
 	@Test
@@ -105,5 +105,67 @@ class JwtTokenProviderTest {
 		assertThat(name).isEqualTo(memberId);
 		assertThat(result).contains(memberRole.getRole());
 
+	}
+
+	@Test
+	@DisplayName("JwtTokenProvider: validateAccessToken, 성공")
+	void whenValidateAccessToken_thenSuccsss() {
+		//given
+		String memberId = String.valueOf(1L);
+		MemberRole memberRole = MemberRole.USER;
+		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(memberId, memberRole);
+
+		//when
+		boolean result = jwtTokenProvider.validateAccessToken(jwtTokenDto.getAccessToken());
+
+		//then
+		assertThat(result).isTrue();
+	}
+
+	@Test
+	@DisplayName("JwtTokenProvider: validateAccessToken, 실패, 리프레시 토큰일 때")
+	void givenRefreshToken_whenValidateAccessToken_thenFalse() {
+		//given
+		String memberId = String.valueOf(1L);
+		MemberRole memberRole = MemberRole.USER;
+		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(memberId, memberRole);
+
+		//when
+		boolean result = jwtTokenProvider.validateAccessToken(jwtTokenDto.getRefreshToken());
+
+		//then
+		assertThat(result).isFalse();
+	}
+
+	@Test
+	@DisplayName("JwtTokenProvider: validateRefreshToken, 성공")
+	void whenValidateRefreshToken_thenSuccsss() {
+		//given
+		String memberId = String.valueOf(1L);
+		MemberRole memberRole = MemberRole.USER;
+		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(memberId, memberRole);
+
+		//when
+		boolean result = jwtTokenProvider.validateRefreshToken(jwtTokenDto.getRefreshToken());
+
+		//then
+		assertThat(result).isTrue();
+	}
+
+
+
+	@Test
+	@DisplayName("JwtTokenProvider: validateRefreshToken, 실패, 액세스 토큰일 때")
+	void givenAccessToken_whenValidateRefreshToken_thenFalse() {
+		//given
+		String memberId = String.valueOf(1L);
+		MemberRole memberRole = MemberRole.USER;
+		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(memberId, memberRole);
+
+		//when
+		boolean result = jwtTokenProvider.validateRefreshToken(jwtTokenDto.getAccessToken());
+
+		//then
+		assertThat(result).isFalse();
 	}
 }

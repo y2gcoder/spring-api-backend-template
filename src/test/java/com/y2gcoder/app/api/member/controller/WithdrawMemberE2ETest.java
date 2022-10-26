@@ -198,6 +198,35 @@ class WithdrawMemberE2ETest {
 	}
 
 	@Test
+	@DisplayName("MemberController(E2E): 회원 탈퇴, 리프레시 토큰으로 탈퇴 시도")
+	void givenRefreshToken_whenWhoAmI_thenFail() throws Exception {
+		//given
+		JwtTokenDto jwtTokenDto = authService.signIn(createSignInRequest(member1.getEmail(), PASSWORD));
+
+		//when
+		ResultActions resultActions = mockMvc.perform(
+				RestDocumentationRequestBuilders.delete("/api/members/{id}", member1.getId())
+						.header(HttpHeaders.AUTHORIZATION, jwtTokenDto.getGrantType() + " " + jwtTokenDto.getRefreshToken())
+		).andExpect(status().isUnauthorized());
+
+		//then
+		resultActions.andDo(
+				document(
+						"withdraw-member-fail-refresh-token",
+						responseFields(
+								fieldWithPath("errorCode").description("에러 코드"),
+								fieldWithPath("errorMessage").description("에러 메시지")
+						)
+				)
+		);
+
+		MvcResult mvcResult = resultActions.andReturn();
+		ErrorResponse errorResponse =
+				objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorResponse.class);
+		assertThat(errorResponse.getErrorCode()).isEqualTo(HttpStatus.UNAUTHORIZED.toString());
+	}
+
+	@Test
 	@DisplayName("MemberController(E2E): 회원 탈퇴, 일반 사용자가 다른 사용자를 탈퇴하려고 시도")
 	void givenMember2_whenWithdrawMember1_thenFail() throws Exception {
 		JwtTokenDto jwtTokenDto = authService.signIn(createSignInRequest(member2.getEmail(), PASSWORD));

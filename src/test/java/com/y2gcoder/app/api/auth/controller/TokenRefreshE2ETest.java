@@ -78,8 +78,6 @@ class TokenRefreshE2ETest {
 				.build();
 	}
 
-
-
 	@Test
 	@DisplayName("AuthController(E2E): 토큰 리프레시, 성공")
 	void whenRefreshToken_thenSuccess() throws Exception {
@@ -159,6 +157,39 @@ class TokenRefreshE2ETest {
 		resultActions.andDo(
 				document(
 						"token-refresh-fail-invalid-refresh-token",
+						responseFields(
+								fieldWithPath("errorCode").description("에러 코드"),
+								fieldWithPath("errorMessage").description("에러 메시지")
+						)
+				)
+		);
+
+		MvcResult mvcResult = resultActions.andReturn();
+		ErrorResponse errorResponse =
+				objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorResponse.class);
+		assertThat(errorResponse.getErrorCode()).isEqualTo(ErrorCode.INVALID_REFRESH_TOKEN.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("AuthController(E2E): 토큰 리프레시, 액세스 토큰 쿠키")
+	void givenAccessTokenCookie_whenRefreshToken_thenFail() throws Exception {
+		//given
+		Member member = memberRepository.findByEmail("test@test.com").get();
+		JwtTokenDto jwtTokenDto = authService
+				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
+		String accessToken = jwtTokenDto.getAccessToken();
+		Cookie refreshTokenCookie = createRefreshTokenCookie(accessToken);
+
+		//when
+		ResultActions resultActions = mockMvc.perform(
+				RestDocumentationRequestBuilders.post("/api/auth/refresh")
+						.cookie(refreshTokenCookie)
+		).andExpect(status().isUnauthorized());
+
+		//then
+		resultActions.andDo(
+				document(
+						"token-refresh-fail-access-token-cookie",
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")

@@ -166,6 +166,37 @@ class SignOutE2ETest {
 
 	}
 
+	@Test
+	@DisplayName("AuthController(E2E): 로그아웃, 인증 헤더에 리프레시 토큰")
+	void givenRefreshToken_whenSignOut_thenFail() throws Exception {
+		//given
+		Member member = memberRepository.findByEmail("test@test.com").get();
+		JwtTokenDto jwtTokenDto = authService
+				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
+
+		//when
+		ResultActions resultActions = mockMvc.perform(
+				RestDocumentationRequestBuilders.post("/api/auth/sign-out")
+						.header(HttpHeaders.AUTHORIZATION, jwtTokenDto.getGrantType() + " " + jwtTokenDto.getRefreshToken())
+		).andExpect(status().isUnauthorized());
+
+		//then
+		resultActions.andDo(
+				document(
+						"sign-out-fail-refresh-token",
+						responseFields(
+								fieldWithPath("errorCode").description("에러 코드"),
+								fieldWithPath("errorMessage").description("에러 메시지")
+						)
+				)
+		);
+
+		MvcResult mvcResult = resultActions.andReturn();
+		ErrorResponse errorResponse =
+				objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorResponse.class);
+		assertThat(errorResponse.getErrorCode()).isEqualTo(HttpStatus.UNAUTHORIZED.toString());
+	}
+
 	private SignInDto.Request createSignInRequest(String email, String password) {
 		SignInDto.Request request = new SignInDto.Request();
 		request.setEmail(email);

@@ -83,7 +83,7 @@ public class AuthService {
 	}
 
 	private void validateRefreshToken(String refreshToken) {
-		boolean validateToken = jwtTokenProvider.validateToken(refreshToken);
+		boolean validateToken = jwtTokenProvider.validateRefreshToken(refreshToken);
 		if (!validateToken) {
 			throw new AuthenticationException(ErrorCode.INVALID_REFRESH_TOKEN);
 		}

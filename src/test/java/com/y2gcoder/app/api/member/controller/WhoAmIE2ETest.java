@@ -164,6 +164,36 @@ class WhoAmIE2ETest {
 		assertThat(errorResponse.getErrorCode()).isEqualTo(HttpStatus.UNAUTHORIZED.toString());
 	}
 
+	@Test
+	@DisplayName("MemberInfoController(E2E): 내 정보 조회, 인증 헤더에 리프레시 토큰")
+	void givenRefreshToken_whenWhoAmI_thenFail() throws Exception {
+		//given
+		JwtTokenDto jwtTokenDto = authService.signIn(createSignInRequest(member1.getEmail(), PASSWORD));
+
+		//when
+		ResultActions resultActions = mockMvc.perform(
+				RestDocumentationRequestBuilders.get("/api/members/me")
+						.header(HttpHeaders.AUTHORIZATION, jwtTokenDto.getGrantType() + " " + jwtTokenDto.getRefreshToken())
+		).andExpect(status().isUnauthorized());
+
+		//then
+		resultActions.andDo(
+				document(
+						"who-am-I-fail-refresh-token",
+						responseFields(
+								fieldWithPath("errorCode").description("에러 코드"),
+								fieldWithPath("errorMessage").description("에러 메시지")
+						)
+				)
+		);
+
+		MvcResult mvcResult = resultActions.andReturn();
+		ErrorResponse errorResponse =
+				objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorResponse.class);
+		assertThat(errorResponse.getErrorCode()).isEqualTo(HttpStatus.UNAUTHORIZED.toString());
+
+	}
+
 	private SignInDto.Request createSignInRequest(String email, String password) {
 		SignInDto.Request request = new SignInDto.Request();
 		request.setEmail(email);
