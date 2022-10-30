@@ -16,3 +16,8 @@
 2. application-dev.yml 설정값 수정
 3. 실행
 
+## API 문서 보는 법
+1. 빌드
+2. build/docs/asciidoc/index.html 생성 확인
+3. index.html 열기
+
