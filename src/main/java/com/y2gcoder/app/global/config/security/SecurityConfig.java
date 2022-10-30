@@ -47,7 +47,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
-				.antMatchers("/login/oauth2/**").permitAll()
+				.antMatchers("/oauth2/**").permitAll()
 				.antMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/sign-up", "/api/auth/sign-in").permitAll()
 				.antMatchers(HttpMethod.POST, "/api/auth/sign-out").authenticated()
 				.antMatchers(HttpMethod.GET, "/api/members/me").authenticated()
