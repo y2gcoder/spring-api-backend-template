@@ -81,11 +81,11 @@ include::{snippets}/token-refresh-fail-not-exists-cookie/http-response.adoc[]
 ===== 실패(유효하지 않은 리프레시 토큰)
 include::{snippets}/token-refresh-fail-invalid-refresh-token/http-response.adoc[]
 
-===== 실패(해당 리프레시 토큰으로 회원을 찾을 수 없음)
-include::{snippets}/token-refresh-fail-not-found-member-by-refresh-token/http-response.adoc[]
+===== 실패(해당 리프레시 토큰을 찾을 수 없음.)
+include::{snippets}/token-refresh-fail-not-found-refresh-token/http-response.adoc[]
 
 ===== 실패(해당 회원의 리프레시 토큰이 만료됨(DB에서)
-include::{snippets}/token-refresh-fail-not-found-member-by-expired-refresh-token-from-db/http-response.adoc[]
+include::{snippets}/token-refresh-fail-expired-refresh-token-from-db/http-response.adoc[]
 
 
 [[resources-auth-sign-out]]
