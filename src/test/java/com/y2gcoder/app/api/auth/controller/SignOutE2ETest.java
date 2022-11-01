@@ -8,6 +8,7 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
+import com.y2gcoder.app.domain.token.repository.RefreshTokenRepository;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
 import com.y2gcoder.app.global.error.ErrorResponse;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
@@ -52,6 +53,9 @@ class SignOutE2ETest {
 
 	@Autowired
 	private MemberRepository memberRepository;
+
+	@Autowired
+	private RefreshTokenRepository refreshTokenRepository;
 
 	@Autowired
 	private AuthService authService;
@@ -99,8 +103,7 @@ class SignOutE2ETest {
 		Cookie resultCookie = mvcResult.getResponse().getCookie(oAuth2Config.getAuth().getRefreshCookieKey());
 		assertThat(resultCookie.getValue()).isBlank();
 
-		Member findMember = memberRepository.findByEmail("test@test.com").get();
-		assertThat(findMember.getRefreshToken()).isBlank();
+		assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
 	}
 
 	@Test

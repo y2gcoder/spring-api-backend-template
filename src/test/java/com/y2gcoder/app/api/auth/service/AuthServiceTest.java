@@ -7,13 +7,14 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.service.MemberService;
-import com.y2gcoder.app.global.error.exception.EntityNotFoundException;
-import com.y2gcoder.app.global.jwt.constant.GrantType;
-import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
-import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
+import com.y2gcoder.app.domain.token.entity.RefreshToken;
+import com.y2gcoder.app.domain.token.service.RefreshTokenService;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.error.exception.BusinessException;
+import com.y2gcoder.app.global.jwt.constant.GrantType;
+import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
+import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
 import com.y2gcoder.app.global.util.DateTimeUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,8 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +46,9 @@ class AuthServiceTest {
 
 	@Mock
 	private MemberService memberService;
+
+	@Mock
+	private RefreshTokenService refreshTokenService;
 
 	@Spy
 	private PasswordEncoder passwordEncoder;
@@ -90,7 +95,7 @@ class AuthServiceTest {
 		assertThat(result.getAccessToken()).isEqualTo(jwtTokenDto.getAccessToken());
 		assertThat(result.getRefreshToken()).isEqualTo(jwtTokenDto.getRefreshToken());
 
-		verify(memberService).updateRefreshToken(any(), anyString(), any());
+		verify(refreshTokenService).updateRefreshToken(any(), anyString(), any());
 	}
 
 	@Test
@@ -126,24 +131,37 @@ class AuthServiceTest {
 	@DisplayName("AuthService: 토큰 재발급, 성공")
 	void whenRefreshToken_thenSuccess() {
 		//given
-		Member member = createMemberWithRefreshToken();
-		doReturn(true).when(jwtTokenProvider).validateRefreshToken(member.getRefreshToken());
-		doReturn(member).when(memberService).findMemberByRefreshToken(member.getRefreshToken());
+		Member member = createMember();
+		String refreshToken = "refreshToken";
+		LocalDateTime tokenExpireTime = LocalDateTime.of(2022, 11, 1, 21, 35, 49);
+		RefreshToken refreshTokenEntity = createRefreshTokenEntity(1L, refreshToken, tokenExpireTime);
+
+		doReturn(true).when(jwtTokenProvider).validateRefreshToken(refreshToken);
+		doReturn(refreshTokenEntity).when(refreshTokenService).findTokenByRefreshToken(refreshToken);
+		doReturn(member).when(memberService).findMemberById(1L);
+
 		String newAccessToken = "newAccess";
 		LocalDateTime newAccessTokenExpireTime = LocalDateTime.now().plusMinutes(15L);
 		Date newAccessTokenExpireTimeToDate = convertLocalDateTimeToDate(newAccessTokenExpireTime);
 		doReturn(newAccessTokenExpireTimeToDate).when(jwtTokenProvider).createAccessTokenExpireTime();
-
 		doReturn(newAccessToken)
 				.when(jwtTokenProvider).createAccessToken(anyString(), any(), any());
 
 		//when
-		TokenRefreshResponse response = authService.refreshToken("refresh");
+		TokenRefreshResponse response = authService.refreshToken(refreshToken);
 
 		//then
 		assertThat(response.getAccessToken()).isEqualTo(newAccessToken);
 		assertThat(response.getAccessTokenExpireTime())
 				.isEqualTo(DateTimeUtils.convertToLocalDateTime(newAccessTokenExpireTimeToDate));
+	}
+
+	private RefreshToken createRefreshTokenEntity(Long memberId, String refreshToken, LocalDateTime tokenExpireTime) {
+		return RefreshToken.builder()
+				.memberId(memberId)
+				.refreshToken(refreshToken)
+				.tokenExpirationTime(tokenExpireTime)
+				.build();
 	}
 
 	@Test
@@ -162,26 +180,12 @@ class AuthServiceTest {
 	@DisplayName("AuthService: 로그아웃, 성공")
 	void whenSignOut_thenSuccess() {
 		//given
-		Member member = createMemberWithRefreshToken();
-		doReturn(member).when(memberService).findMemberById(anyLong());
 
 		//when
 		authService.signOut(1L);
 
 		//then
-		verify(memberService).findMemberById(1L);
-	}
-
-	@Test
-	@DisplayName("AuthService: 로그아웃, 해당 멤버 ID로 멤버를 찾을 수 없음.")
-	void givenInvalidMemberId_whenSignOut_thenNotFoundMember() {
-		//given
-		doThrow(EntityNotFoundException.class).when(memberService).findMemberById(anyLong());
-
-		//when
-		//then
-		assertThatThrownBy(() -> authService.signOut(1L))
-				.isInstanceOf(EntityNotFoundException.class);
+		verify(refreshTokenService, times(1)).removeRefreshToken(1L);
 	}
 
 	private SignUpRequest createSignUpRequest() {
@@ -225,12 +229,6 @@ class AuthServiceTest {
 				.build();
 	}
 
-	private Member createMemberWithRefreshToken() {
-		Member member = createMember();
-		member.updateRefreshToken("refresh", LocalDateTime.of(2022, 10, 18, 16, 0, 0).plusWeeks(2L));
-		return member;
-	}
-
 	private JwtTokenDto createJwtTokenDto() {
 		return JwtTokenDto.builder()
 				.grantType(GrantType.BEARER.getType())
@@ -238,16 +236,6 @@ class AuthServiceTest {
 				.accessTokenExpireTime(new Date())
 				.refreshToken("refresh")
 				.refreshTokenExpireTime(new Date())
-				.build();
-	}
-
-	private JwtTokenDto createJwtTokenDto(String newAccessToken, LocalDateTime newAccessTokenExpireTime, String newRefreshToken, LocalDateTime newRefreshTokenExpireTime) {
-		return JwtTokenDto.builder()
-				.grantType(GrantType.BEARER.getType())
-				.accessToken(newAccessToken)
-				.accessTokenExpireTime(convertLocalDateTimeToDate(newAccessTokenExpireTime))
-				.refreshToken(newRefreshToken)
-				.refreshTokenExpireTime(convertLocalDateTimeToDate(newRefreshTokenExpireTime))
 				.build();
 	}
 

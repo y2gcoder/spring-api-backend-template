@@ -7,6 +7,7 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
+import com.y2gcoder.app.domain.token.repository.RefreshTokenRepository;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.ErrorResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,9 @@ class SignInE2ETest {
 
 	@Autowired
 	private MemberRepository memberRepository;
+
+	@Autowired
+	private RefreshTokenRepository refreshTokenRepository;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -104,8 +108,7 @@ class SignInE2ETest {
 				.readValue(mvcResult.getResponse().getContentAsString(), SignInDto.Response.class);
 		assertThat(result.getAccessToken()).isNotBlank();
 
-		Member resultMember = memberRepository.findById(savedMember.getId()).get();
-		assertThat(resultMember.getRefreshToken()).isNotBlank();
+		assertThat(refreshTokenRepository.findByMemberId(savedMember.getId())).isNotEmpty();
 
 		Cookie resultCookie = mvcResult.getResponse().getCookie(REFRESH_TOKEN_COOKIE_NAME);
 		assertThat(resultCookie).isNotNull();

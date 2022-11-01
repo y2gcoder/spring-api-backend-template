@@ -7,6 +7,8 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.service.MemberService;
+import com.y2gcoder.app.domain.token.entity.RefreshToken;
+import com.y2gcoder.app.domain.token.service.RefreshTokenService;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.error.exception.BusinessException;
@@ -28,6 +30,8 @@ public class AuthService {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final MemberService memberService;
 	private final PasswordEncoder passwordEncoder;
+
+	private final RefreshTokenService refreshTokenService;
 
 	@Transactional
 	public void signUp(SignUpRequest request) {
@@ -55,7 +59,7 @@ public class AuthService {
 		// 토큰 만들기(access, refresh)
 		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
 		// refresh token 저장 (DB)
-		memberService.updateRefreshToken(
+		refreshTokenService.updateRefreshToken(
 				member.getId(),
 				jwtTokenDto.getRefreshToken(),
 				jwtTokenDto.getRefreshTokenExpireTime()
@@ -78,7 +82,9 @@ public class AuthService {
 
 	public TokenRefreshResponse refreshToken(String refreshToken) {
 		validateRefreshToken(refreshToken);
-		Member member = memberService.findMemberByRefreshToken(refreshToken);
+
+		RefreshToken refreshTokenEntity = refreshTokenService.findTokenByRefreshToken(refreshToken);
+		Member member = memberService.findMemberById(refreshTokenEntity.getMemberId());
 		Date accessTokenExpireTime = jwtTokenProvider.createAccessTokenExpireTime();
 		String accessToken =
 				jwtTokenProvider.createAccessToken(String.valueOf(member.getId()), member.getRole(), accessTokenExpireTime);
@@ -98,7 +104,6 @@ public class AuthService {
 
 	@Transactional
 	public void signOut(Long memberId) {
-		Member member = memberService.findMemberById(memberId);
-		member.updateRefreshToken("", null);
+		refreshTokenService.removeRefreshToken(memberId);
 	}
 }

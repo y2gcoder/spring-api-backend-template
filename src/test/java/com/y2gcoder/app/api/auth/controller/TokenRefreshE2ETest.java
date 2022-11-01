@@ -9,6 +9,7 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
+import com.y2gcoder.app.domain.token.service.RefreshTokenService;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.ErrorResponse;
@@ -58,6 +59,9 @@ class TokenRefreshE2ETest {
 
 	@Autowired
 	private AuthService authService;
+
+	@Autowired
+	private RefreshTokenService refreshTokenService;
 
 	@Autowired
 	private OAuth2Config oAuth2Config;
@@ -205,7 +209,7 @@ class TokenRefreshE2ETest {
 	}
 
 	@Test
-	@DisplayName("AuthController(E2E): 토큰 리프레시, 해당 리프레시 토큰으로 멤버 찾을 수 없음")
+	@DisplayName("AuthController(E2E): 토큰 리프레시, 해당 리프레시 토큰 없음.")
 	void givenNotFoundMemberByRefreshToken_whenRefreshToken_thenFail() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
@@ -213,7 +217,7 @@ class TokenRefreshE2ETest {
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 		String originalRefreshToken = jwtTokenDto.getRefreshToken();
 		Cookie refreshTokenCookie = createRefreshTokenCookie(originalRefreshToken);
-		member.updateRefreshToken("another refresh token", null);
+		refreshTokenService.removeRefreshToken(member.getId());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
@@ -224,7 +228,7 @@ class TokenRefreshE2ETest {
 		//then
 		resultActions.andDo(
 				document(
-						"token-refresh-fail-not-found-member-by-refresh-token",
+						"token-refresh-fail-not-found-refresh-token",
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")
@@ -239,7 +243,7 @@ class TokenRefreshE2ETest {
 	}
 
 	@Test
-	@DisplayName("AuthController(E2E): 토큰 리프레시, DB에서 만료된 리프레시 토큰으로 멤버 찾을 수 없음")
+	@DisplayName("AuthController(E2E): 토큰 리프레시, 리프레시 토큰이 만료됨.")
 	void givenNotFoundMemberByExpiredRefreshTokenFromDB_whenRefreshToken_thenFail() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
@@ -247,7 +251,7 @@ class TokenRefreshE2ETest {
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 		String originalRefreshToken = jwtTokenDto.getRefreshToken();
 		Cookie refreshTokenCookie = createRefreshTokenCookie(originalRefreshToken);
-		member.updateRefreshToken(originalRefreshToken, LocalDateTime.now());
+		refreshTokenService.updateRefreshToken(member.getId(), originalRefreshToken, LocalDateTime.now().minusSeconds(1));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
@@ -258,7 +262,7 @@ class TokenRefreshE2ETest {
 		//then
 		resultActions.andDo(
 				document(
-						"token-refresh-fail-not-found-member-by-expired-refresh-token-from-db",
+						"token-refresh-fail-expired-refresh-token-from-db",
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")

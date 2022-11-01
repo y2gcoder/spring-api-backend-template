@@ -4,8 +4,6 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
-import com.y2gcoder.app.global.error.ErrorCode;
-import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.error.exception.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,81 +107,6 @@ class MemberServiceTest {
 		//when
 		//then
 		assertThatThrownBy(() -> memberService.findMemberByEmail("test@test.com"))
-				.isInstanceOf(EntityNotFoundException.class);
-	}
-
-	@Test
-	@DisplayName("MemberService: findMemberByRefreshToken, 해당 멤버 호출 성공")
-	void whenFindMemberByRefreshToken_thenFoundMember() {
-		//given
-		Member member = createMember();
-		member.updateRefreshToken("refresh", LocalDateTime.MAX);
-		doReturn(Optional.of(member)).when(memberRepository).findByRefreshToken(member.getRefreshToken());
-		//when
-		Member result = memberService.findMemberByRefreshToken(member.getRefreshToken());
-		//then
-		assertThat(result.getEmail()).isEqualTo(member.getEmail());
-		assertThat(result.getRefreshToken()).isEqualTo(member.getRefreshToken());
-		assertThat(result.getTokenExpirationTime()).isNotNull();
-		assertThat(result.getTokenExpirationTime()).isAfter(LocalDateTime.now());
-	}
-
-	@Test
-	@DisplayName("MemberService: findMemberByRefreshToken, 해당 refresh token이 없음")
-	void whenFindMemberByRefreshToken_thenThrowAuthenticationExceptionNotFoundRefreshToken() {
-		//given
-		doReturn(Optional.empty()).when(memberRepository).findByRefreshToken(anyString());
-		//when
-		//then
-		assertThatThrownBy(() -> memberService.findMemberByRefreshToken("refresh"))
-				.isInstanceOf(AuthenticationException.class)
-				.hasMessage(ErrorCode.NOT_FOUND_REFRESH_TOKEN.getMessage());
-	}
-
-	@Test
-	@DisplayName("MemberService: findMemberByRefreshToken, 해당 refresh token이 만료됨")
-	void givenExpiredTokenExpireTime_whenFindMemberByRefreshToken_thenThrowAuthenticationExceptionExpiredRefreshToken() {
-		//given
-		Member member = createMember();
-		member.updateRefreshToken("refresh", LocalDateTime.now());
-		doReturn(Optional.of(member)).when(memberRepository).findByRefreshToken(member.getRefreshToken());
-		//when
-		//then
-		assertThatThrownBy(() -> memberService.findMemberByRefreshToken(member.getRefreshToken()))
-				.isInstanceOf(AuthenticationException.class)
-				.hasMessage(ErrorCode.EXPIRED_REFRESH_TOKEN.getMessage());
-	}
-
-	@Test
-	@DisplayName("MemberService: updateRefreshToken, update 성공")
-	void whenUpdateRefreshToken_thenUpdateRefreshTokenInfo() {
-		//given
-		Member member = createMember();
-		member.updateRefreshToken("refresh", LocalDateTime.now());
-		doReturn(Optional.of(member)).when(memberRepository).findById(anyLong());
-
-		//when
-		Long memberId = 1L;
-		String updatedRefreshToken = "updatedRefresh";
-		LocalDateTime updatedTokenExpireTime = LocalDateTime.MAX;
-		memberService.updateRefreshToken(memberId, updatedRefreshToken, updatedTokenExpireTime);
-		//then
-		assertThat(member.getRefreshToken()).isEqualTo(updatedRefreshToken);
-		assertThat(member.getTokenExpirationTime()).isEqualTo(updatedTokenExpireTime);
-	}
-
-	@Test
-	@DisplayName("MemberService: updateRefreshToken, memberId로 member를 찾지 못함.")
-	void givenInvalidMemberId_whenUpdateRefreshToken_thenThrowEntityNotFoundException() {
-		//given
-		doReturn(Optional.empty()).when(memberRepository).findById(anyLong());
-
-		//when
-		//then
-		Long memberId = 1L;
-		String updatedRefreshToken = "updatedRefresh";
-		LocalDateTime updatedTokenExpireTime = LocalDateTime.MAX;
-		assertThatThrownBy(() -> memberService.updateRefreshToken(memberId, updatedRefreshToken, updatedTokenExpireTime))
 				.isInstanceOf(EntityNotFoundException.class);
 	}
 

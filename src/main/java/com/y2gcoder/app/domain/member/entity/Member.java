@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -37,10 +36,6 @@ public class Member extends BaseTimeEntity {
 	@Column(nullable = false, length = 10)
 	private AuthProvider provider;
 
-	private String refreshToken;
-
-	private LocalDateTime tokenExpirationTime;
-
 	@Builder
 	public Member(
 			String email, String password, String nickname, String profile, MemberRole role, AuthProvider provider
@@ -51,10 +46,5 @@ public class Member extends BaseTimeEntity {
 		this.profile = profile;
 		this.role = role;
 		this.provider = provider;
-	}
-
-	public void updateRefreshToken(String refreshToken, LocalDateTime tokenExpirationTime) {
-		this.refreshToken = refreshToken;
-		this.tokenExpirationTime = tokenExpirationTime;
 	}
 }
