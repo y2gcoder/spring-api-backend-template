@@ -1,7 +1,7 @@
 package com.y2gcoder.app.global.security.handler;
 
 import com.y2gcoder.app.domain.member.constant.MemberRole;
-import com.y2gcoder.app.domain.token.service.RefreshTokenService;
+import com.y2gcoder.app.domain.token.service.TokenService;
 import com.y2gcoder.app.global.config.security.OAuth2Config;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
@@ -32,7 +32,7 @@ import java.util.Optional;
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 	private final OAuth2Config oAuth2Config;
-	private final RefreshTokenService refreshTokenService;
+	private final TokenService tokenService;
 	private final CustomAuthorizationRequestRepository authorizationRequestRepository;
 	private final JwtTokenProvider jwtTokenProvider;
 
@@ -67,7 +67,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 				.stream().map(GrantedAuthority::getAuthority).map(MemberRole::from).findFirst().orElse(null);
 
 		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(memberId, memberRole);
-		refreshTokenService.updateRefreshToken(
+		tokenService.updateRefreshToken(
 				Long.parseLong(memberId),
 				jwtTokenDto.getRefreshToken(),
 				jwtTokenDto.getRefreshTokenExpireTime()

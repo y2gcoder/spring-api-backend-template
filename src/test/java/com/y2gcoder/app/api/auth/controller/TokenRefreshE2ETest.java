@@ -9,7 +9,7 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
-import com.y2gcoder.app.domain.token.service.RefreshTokenService;
+import com.y2gcoder.app.domain.token.service.TokenService;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.ErrorResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +57,7 @@ class TokenRefreshE2ETest {
 	private AuthService authService;
 
 	@Autowired
-	private RefreshTokenService refreshTokenService;
+	private TokenService tokenService;
 
 	private ObjectMapper objectMapper;
 
@@ -228,7 +228,7 @@ class TokenRefreshE2ETest {
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 		String originalRefreshToken = signInResponse.getRefreshToken();
 		TokenRefreshDto.Request request = createTokenRefreshRequest(originalRefreshToken);
-		refreshTokenService.removeRefreshToken(member.getId());
+		tokenService.removeRefreshToken(member.getId());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
@@ -266,7 +266,7 @@ class TokenRefreshE2ETest {
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 		String originalRefreshToken = signInResponse.getRefreshToken();
 		TokenRefreshDto.Request request = createTokenRefreshRequest(originalRefreshToken);
-		refreshTokenService.updateRefreshToken(member.getId(), originalRefreshToken, LocalDateTime.now().minusSeconds(1));
+		tokenService.updateRefreshToken(member.getId(), originalRefreshToken, LocalDateTime.now().minusSeconds(1));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(

@@ -8,7 +8,7 @@ import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.service.MemberService;
 import com.y2gcoder.app.domain.token.entity.RefreshToken;
-import com.y2gcoder.app.domain.token.service.RefreshTokenService;
+import com.y2gcoder.app.domain.token.service.TokenService;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.error.exception.BusinessException;
@@ -48,7 +48,7 @@ class AuthServiceTest {
 	private MemberService memberService;
 
 	@Mock
-	private RefreshTokenService refreshTokenService;
+	private TokenService tokenService;
 
 	@Spy
 	private PasswordEncoder passwordEncoder;
@@ -95,7 +95,7 @@ class AuthServiceTest {
 		assertThat(result.getAccessToken()).isEqualTo(jwtTokenDto.getAccessToken());
 		assertThat(result.getRefreshToken()).isEqualTo(jwtTokenDto.getRefreshToken());
 
-		verify(refreshTokenService).updateRefreshToken(any(), anyString(), any());
+		verify(tokenService).updateRefreshToken(any(), anyString(), any());
 	}
 
 	@Test
@@ -138,7 +138,7 @@ class AuthServiceTest {
 		RefreshToken refreshTokenEntity = createRefreshTokenEntity(1L, refreshToken, tokenExpireTime);
 
 		doReturn(true).when(jwtTokenProvider).validateRefreshToken(refreshToken);
-		doReturn(refreshTokenEntity).when(refreshTokenService).findTokenByRefreshToken(refreshToken);
+		doReturn(refreshTokenEntity).when(tokenService).findTokenByRefreshToken(refreshToken);
 		doReturn(member).when(memberService).findMemberById(1L);
 
 		String newAccessToken = "newAccess";
@@ -192,7 +192,7 @@ class AuthServiceTest {
 		authService.signOut(1L);
 
 		//then
-		verify(refreshTokenService, times(1)).removeRefreshToken(1L);
+		verify(tokenService, times(1)).removeRefreshToken(1L);
 	}
 
 	private SignUpRequest createSignUpRequest() {
