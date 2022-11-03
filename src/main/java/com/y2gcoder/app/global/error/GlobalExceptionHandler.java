@@ -4,6 +4,7 @@ import com.y2gcoder.app.global.error.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -15,6 +16,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+	/**
+	 * 주로 RequestBody 관련 예외(요청 json이 없을 때)
+	 */
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	protected ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+		log.error("HttpMessageNotReadableException", e);
+		ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.BAD_REQUEST.toString(), e.getMessage());
+		return ResponseEntity.badRequest().body(errorResponse);
+	}
+
+	/**
+	 *  인가 실패 시 예외
+	 */
 	@ExceptionHandler(AccessDeniedException.class)
 	protected ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
 		log.error("AccessDeniedException", e);
