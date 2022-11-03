@@ -29,8 +29,6 @@ public final class OAuth2Config {
 	public static final class Auth {
 		@NotBlank
 		private final String tokenSecret;
-		@NotBlank
-		private final String refreshCookieKey;
 		@Positive
 		private final long accessTokenValidityInMs;
 		@Positive

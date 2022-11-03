@@ -12,8 +12,6 @@ import com.y2gcoder.app.global.security.repository.CustomAuthorizationRequestRep
 import com.y2gcoder.app.global.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -75,17 +73,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 				jwtTokenDto.getRefreshTokenExpireTime()
 		);
 
-		ResponseCookie refreshTokenCookie = CookieUtils.generateResponseCookie(
-				oAuth2Config.getAuth().getRefreshCookieKey(),
-				jwtTokenDto.getRefreshToken(),
-				oAuth2Config.getAuth().getRefreshTokenValidityInMs() / 1000
-		);
-
-		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-
 		return UriComponentsBuilder.fromUriString(targetUrl)
-				.queryParam("token", jwtTokenDto.getAccessToken())
 				.queryParam("grant", jwtTokenDto.getGrantType())
+				.queryParam("access", jwtTokenDto.getAccessToken())
+				.queryParam("refresh", jwtTokenDto.getRefreshToken())
 				.build().toUriString();
 	}
 

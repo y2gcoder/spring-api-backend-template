@@ -2,7 +2,7 @@ package com.y2gcoder.app.api.auth.service;
 
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
-import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
+import com.y2gcoder.app.api.auth.service.dto.TokenRefreshDto;
 import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
@@ -133,6 +133,7 @@ class AuthServiceTest {
 		//given
 		Member member = createMember();
 		String refreshToken = "refreshToken";
+		TokenRefreshDto.Request request = createTokenRefreshRequest(refreshToken);
 		LocalDateTime tokenExpireTime = LocalDateTime.of(2022, 11, 1, 21, 35, 49);
 		RefreshToken refreshTokenEntity = createRefreshTokenEntity(1L, refreshToken, tokenExpireTime);
 
@@ -148,7 +149,7 @@ class AuthServiceTest {
 				.when(jwtTokenProvider).createAccessToken(anyString(), any(), any());
 
 		//when
-		TokenRefreshResponse response = authService.refreshToken(refreshToken);
+		TokenRefreshDto.Response response = authService.refreshToken(request);
 
 		//then
 		assertThat(response.getAccessToken()).isEqualTo(newAccessToken);
@@ -171,9 +172,15 @@ class AuthServiceTest {
 		doReturn(false).when(jwtTokenProvider).validateRefreshToken(anyString());
 		//when
 		//then
-		assertThatThrownBy(() -> authService.refreshToken("invalid"))
+		assertThatThrownBy(() -> authService.refreshToken(createTokenRefreshRequest("invalid")))
 				.isInstanceOf(AuthenticationException.class)
 				.hasMessage(ErrorCode.INVALID_REFRESH_TOKEN.getMessage());
+	}
+
+	private TokenRefreshDto.Request createTokenRefreshRequest(String refreshToken) {
+		TokenRefreshDto.Request request = new TokenRefreshDto.Request();
+		request.setRefreshToken(refreshToken);
+		return request;
 	}
 
 	@Test

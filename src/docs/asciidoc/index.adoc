@@ -75,8 +75,8 @@ include::{snippets}/token-refresh/http-request.adoc[]
 include::{snippets}/token-refresh/http-response.adoc[]
 include::{snippets}/token-refresh/response-fields.adoc[]
 
-===== 실패(리프레시 토큰 없음)
-include::{snippets}/token-refresh-fail-not-exists-cookie/http-response.adoc[]
+===== 실패(요청 JSON이 없음)
+include::{snippets}/token-refresh-fail-not-exists-request/http-response.adoc[]
 
 ===== 실패(유효하지 않은 리프레시 토큰)
 include::{snippets}/token-refresh-fail-invalid-refresh-token/http-response.adoc[]

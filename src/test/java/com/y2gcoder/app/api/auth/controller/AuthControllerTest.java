@@ -5,14 +5,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.y2gcoder.app.api.auth.service.AuthService;
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
-import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
+import com.y2gcoder.app.api.auth.service.dto.TokenRefreshDto;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.global.jwt.constant.GrantType;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.resolver.signinmember.SignInMemberArgumentResolver;
 import com.y2gcoder.app.global.resolver.signinmember.SignInMemberDto;
-import com.y2gcoder.app.global.util.CookieUtils;
-import com.y2gcoder.app.global.util.RefreshTokenCookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,14 +19,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import javax.servlet.http.Cookie;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -47,15 +43,10 @@ class AuthControllerTest {
 	private AuthService authService;
 
 	@Mock
-	private RefreshTokenCookieUtils refreshTokenCookieUtils;
-
-	@Mock
 	private SignInMemberArgumentResolver signInMemberArgumentResolver;
 
 	private MockMvc mockMvc;
 	private ObjectMapper objectMapper;
-
-	private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshtoken";
 
 	@BeforeEach
 	public void beforeEach() {
@@ -98,9 +89,7 @@ class AuthControllerTest {
 		SignInDto.Request request = createSignInRequest();
 		JwtTokenDto jwtTokenDto = createJwtTokenDto();
 		doReturn(jwtTokenDto).when(authService).signIn(any(SignInDto.Request.class));
-		doReturn(createResponseRefreshTokenCookie(jwtTokenDto.getRefreshToken()))
-				.when(refreshTokenCookieUtils)
-				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
+
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.post("/api/auth/sign-in")
@@ -112,9 +101,7 @@ class AuthControllerTest {
 		MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
 		SignInDto.Response result = objectMapper
 				.readValue(mvcResult.getResponse().getContentAsString(), SignInDto.Response.class);
-		Cookie resultCookie = mvcResult.getResponse().getCookie(REFRESH_TOKEN_COOKIE_NAME);
 		assertThat(result.getAccessToken()).isEqualTo(jwtTokenDto.getAccessToken());
-		assertThat(resultCookie).isNotNull();
 	}
 
 	private SignInDto.Request createSignInRequest() {
@@ -124,43 +111,41 @@ class AuthControllerTest {
 		return request;
 	}
 
-	private ResponseCookie createResponseRefreshTokenCookie(String refreshToken) {
-		return CookieUtils
-				.generateResponseCookie(
-						REFRESH_TOKEN_COOKIE_NAME,
-						refreshToken,
-						3600
-				);
-	}
-
 	@Test
 	@DisplayName("AuthController(단위): 토큰 리프레시, 성공")
 	void whenRefreshToken_thenSuccess() throws Exception {
 		//given
 		String refreshToken = "refresh";
-		Cookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
 		String newAccessToken = "newAccess";
 		LocalDateTime expireTime = LocalDateTime.now();
-		TokenRefreshResponse tokenRefreshResponse = createTokenRefreshResponse(newAccessToken, expireTime);
-		doReturn(tokenRefreshResponse).when(authService).refreshToken(refreshToken);
+		TokenRefreshDto.Request request = createTokenRefreshRequest(refreshToken);
+		TokenRefreshDto.Response tokenRefreshResponse = createTokenRefreshResponse(newAccessToken, expireTime);
+		doReturn(tokenRefreshResponse).when(authService).refreshToken(any(TokenRefreshDto.Request.class));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				MockMvcRequestBuilders.post("/api/auth/refresh")
-						.cookie(refreshTokenCookie)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
 		);
 
 		//then
 		MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
-		TokenRefreshResponse response = objectMapper
-				.readValue(mvcResult.getResponse().getContentAsString(), TokenRefreshResponse.class);
+		TokenRefreshDto.Response response = objectMapper
+				.readValue(mvcResult.getResponse().getContentAsString(), TokenRefreshDto.Response.class);
 
 		assertThat(response.getAccessToken()).isEqualTo(newAccessToken);
 		assertThat(response.getAccessTokenExpireTime()).isEqualToIgnoringNanos(expireTime);
 	}
 
-	private TokenRefreshResponse createTokenRefreshResponse(String accessToken, LocalDateTime expireTime) {
-		return TokenRefreshResponse.builder()
+	private TokenRefreshDto.Request createTokenRefreshRequest(String refreshToken) {
+		TokenRefreshDto.Request request = new TokenRefreshDto.Request();
+		request.setRefreshToken(refreshToken);
+		return request;
+	}
+
+	private TokenRefreshDto.Response createTokenRefreshResponse(String accessToken, LocalDateTime expireTime) {
+		return TokenRefreshDto.Response.builder()
 				.grantType(GrantType.BEARER.getType())
 				.accessToken(accessToken)
 				.accessTokenExpireTime(expireTime)
@@ -177,13 +162,6 @@ class AuthControllerTest {
 				.build();
 	}
 
-	private Cookie createRefreshTokenCookie(String refreshToken) {
-		Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
-		cookie.setPath("/");
-		cookie.setMaxAge(3600);
-		return cookie;
-	}
-
 	@Test
 	@DisplayName("AuthController(단위): 로그아웃, 성공")
 	void whenSignOut_thenSuccess() throws Exception {
@@ -195,28 +173,14 @@ class AuthControllerTest {
 				.build();
 		doReturn(true).when(signInMemberArgumentResolver).supportsParameter(any());
 		doReturn(signInMemberDto).when(signInMemberArgumentResolver).resolveArgument(any(), any(), any(), any());
-		ResponseCookie signOutCookie = createSignOutCookie();
-		doReturn(signOutCookie).when(refreshTokenCookieUtils).generateSignOutCookie();
 
 		//when
-		ResultActions resultActions = mockMvc.perform(
+		mockMvc.perform(
 				MockMvcRequestBuilders.post("/api/auth/sign-out")
-		);
+		).andExpect(status().isOk());
 
 		verify(authService).signOut(memberId);
-		MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
-		Cookie resultCookie = mvcResult.getResponse().getCookie(REFRESH_TOKEN_COOKIE_NAME);
-		assertThat(resultCookie.getMaxAge()).isEqualTo(1);
 
-	}
-
-	private ResponseCookie createSignOutCookie() {
-		return CookieUtils
-				.generateResponseCookie(
-						REFRESH_TOKEN_COOKIE_NAME,
-						"",
-						1
-				);
 	}
 
 }

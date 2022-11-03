@@ -9,7 +9,6 @@ import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
 import com.y2gcoder.app.domain.token.repository.RefreshTokenRepository;
-import com.y2gcoder.app.global.config.security.OAuth2Config;
 import com.y2gcoder.app.global.error.ErrorResponse;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,8 +28,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.servlet.http.Cookie;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -59,9 +56,6 @@ class SignOutE2ETest {
 
 	@Autowired
 	private AuthService authService;
-
-	@Autowired
-	private OAuth2Config oAuth2Config;
 
 	private ObjectMapper objectMapper;
 
@@ -98,10 +92,6 @@ class SignOutE2ETest {
 		resultActions.andDo(
 				document("sign-out")
 		);
-
-		MvcResult mvcResult = resultActions.andReturn();
-		Cookie resultCookie = mvcResult.getResponse().getCookie(oAuth2Config.getAuth().getRefreshCookieKey());
-		assertThat(resultCookie.getValue()).isBlank();
 
 		assertThat(refreshTokenRepository.findByMemberId(member.getId())).isEmpty();
 	}

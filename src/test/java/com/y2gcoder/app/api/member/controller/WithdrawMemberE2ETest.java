@@ -8,7 +8,6 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
-import com.y2gcoder.app.global.config.security.OAuth2Config;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.ErrorResponse;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
@@ -30,13 +29,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.Cookie;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureRestDocs(uriScheme = "https", uriHost = "y2gcoder.com", uriPort = 443)
@@ -57,9 +57,6 @@ class WithdrawMemberE2ETest {
 
 	@Autowired
 	private AuthService authService;
-
-	@Autowired
-	private OAuth2Config oAuth2Config;
 
 	private ObjectMapper objectMapper;
 
@@ -104,13 +101,12 @@ class WithdrawMemberE2ETest {
 		//then
 		resultActions.andDo(
 				document(
-						"withdraw-member"
+						"withdraw-member",
+						pathParameters(
+								parameterWithName("id").description("Member Id")
+						)
 				)
 		);
-
-		MvcResult mvcResult = resultActions.andReturn();
-		Cookie resultCookie = mvcResult.getResponse().getCookie(oAuth2Config.getAuth().getRefreshCookieKey());
-		assertThat(resultCookie.getValue()).isBlank();
 
 		List<Member> result = memberRepository.findAll();
 		assertThat(result.size()).isEqualTo(2);
@@ -133,7 +129,10 @@ class WithdrawMemberE2ETest {
 		//then
 		resultActions.andDo(
 				document(
-						"withdraw-member-by-admin"
+						"withdraw-member-by-admin",
+						pathParameters(
+								parameterWithName("id").description("Member Id")
+						)
 				)
 		);
 
@@ -155,6 +154,9 @@ class WithdrawMemberE2ETest {
 		resultActions.andDo(
 				document(
 						"withdraw-member-fail-not-found-access-token",
+						pathParameters(
+								parameterWithName("id").description("Member Id")
+						),
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")
@@ -184,6 +186,9 @@ class WithdrawMemberE2ETest {
 		resultActions.andDo(
 				document(
 						"withdraw-member-fail-invalid-access-token",
+						pathParameters(
+								parameterWithName("id").description("Member Id")
+						),
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")
@@ -213,6 +218,9 @@ class WithdrawMemberE2ETest {
 		resultActions.andDo(
 				document(
 						"withdraw-member-fail-refresh-token",
+						pathParameters(
+								parameterWithName("id").description("Member Id")
+						),
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")
@@ -241,6 +249,9 @@ class WithdrawMemberE2ETest {
 		resultActions.andDo(
 				document(
 						"withdraw-member-fail-another-normal-member",
+						pathParameters(
+								parameterWithName("id").description("Member Id")
+						),
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")
@@ -270,6 +281,9 @@ class WithdrawMemberE2ETest {
 		resultActions.andDo(
 				document(
 						"withdraw-member-fail-not-found-target",
+						pathParameters(
+								parameterWithName("id").description("Member Id")
+						),
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")

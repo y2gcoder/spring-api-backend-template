@@ -3,17 +3,17 @@ package com.y2gcoder.app.api.auth.controller;
 import com.y2gcoder.app.api.auth.service.AuthService;
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
-import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
+import com.y2gcoder.app.api.auth.service.dto.TokenRefreshDto;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.resolver.signinmember.SignInMember;
 import com.y2gcoder.app.global.resolver.signinmember.SignInMemberDto;
-import com.y2gcoder.app.global.util.RefreshTokenCookieUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
@@ -23,7 +23,6 @@ import javax.validation.Valid;
 public class AuthController {
 
 	private final AuthService authService;
-	private final RefreshTokenCookieUtils refreshTokenCookieUtils;
 
 	@PostMapping("/sign-up")
 	public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequest request) {
@@ -38,30 +37,21 @@ public class AuthController {
 				.grantType(jwtTokenDto.getGrantType())
 				.accessToken(jwtTokenDto.getAccessToken())
 				.accessTokenExpireTime(jwtTokenDto.getAccessTokenExpireTime())
+				.refreshToken(jwtTokenDto.getRefreshToken())
+				.refreshTokenExpireTime(jwtTokenDto.getRefreshTokenExpireTime())
 				.build();
-
-		//Cookie에 refresh token 저장!!
-		ResponseCookie refreshTokenCookie = refreshTokenCookieUtils
-				.generateRefreshTokenCookie(jwtTokenDto.getRefreshToken());
-
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString()).body(result);
+		return ResponseEntity.ok().body(result);
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<TokenRefreshResponse> refreshToken(@CookieValue("refreshtoken") String refreshToken) {
-
-		TokenRefreshResponse response = authService.refreshToken(refreshToken);
-		return ResponseEntity.ok(response);
+	public ResponseEntity<TokenRefreshDto.Response> refreshToken(@Valid @RequestBody TokenRefreshDto.Request request) {
+		return ResponseEntity.ok(authService.refreshToken(request));
 	}
 
 	@PostMapping("/sign-out")
 	public ResponseEntity<Void> signOut(@SignInMember SignInMemberDto signInMemberDto) {
-
 		authService.signOut(signInMemberDto.getMemberId());
-
-		ResponseCookie signOutCookie = refreshTokenCookieUtils.generateSignOutCookie();
-
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, signOutCookie.toString()).build();
+		return ResponseEntity.ok().build();
 	}
 
 }

@@ -36,11 +36,18 @@ public class SignInDto {
 		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
 		private LocalDateTime accessTokenExpireTime;
 
+		private String refreshToken;
+
+		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+		private LocalDateTime refreshTokenExpireTime;
+
 		@Builder
-		public Response(String grantType, String accessToken, LocalDateTime accessTokenExpireTime) {
+		public Response(String grantType, String accessToken, LocalDateTime accessTokenExpireTime, String refreshToken, LocalDateTime refreshTokenExpireTime) {
 			this.grantType = grantType;
 			this.accessToken = accessToken;
 			this.accessTokenExpireTime = accessTokenExpireTime;
+			this.refreshToken = refreshToken;
+			this.refreshTokenExpireTime = refreshTokenExpireTime;
 		}
 	}
 }

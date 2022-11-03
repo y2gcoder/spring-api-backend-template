@@ -4,13 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.y2gcoder.app.api.auth.service.AuthService;
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
-import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
+import com.y2gcoder.app.api.auth.service.dto.TokenRefreshDto;
 import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
 import com.y2gcoder.app.domain.token.service.RefreshTokenService;
-import com.y2gcoder.app.global.config.security.OAuth2Config;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.ErrorResponse;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
@@ -23,6 +22,7 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,14 +31,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.Cookie;
-
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureRestDocs(uriScheme = "https", uriHost = "y2gcoder.com", uriPort = 443)
@@ -62,9 +59,6 @@ class TokenRefreshE2ETest {
 
 	@Autowired
 	private RefreshTokenService refreshTokenService;
-
-	@Autowired
-	private OAuth2Config oAuth2Config;
 
 	private ObjectMapper objectMapper;
 
@@ -91,12 +85,13 @@ class TokenRefreshE2ETest {
 		JwtTokenDto jwtTokenDto = authService
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 		String originalRefreshToken = jwtTokenDto.getRefreshToken();
-		Cookie refreshTokenCookie = createRefreshTokenCookie(originalRefreshToken);
+		TokenRefreshDto.Request request = createTokenRefreshRequest(originalRefreshToken);
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 			RestDocumentationRequestBuilders.post("/api/auth/refresh")
-					.cookie(refreshTokenCookie)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request))
 		).andExpect(status().isOk());
 
 		//빠른 시간 안에 토큰을 재생성하면 똑같은 토큰이 나옴.
@@ -105,6 +100,9 @@ class TokenRefreshE2ETest {
 		resultActions.andDo(
 				document(
 						"token-refresh",
+						requestFields(
+								fieldWithPath("refreshToken").description("리프레시 토큰")
+						),
 						responseFields(
 								fieldWithPath("grantType").description("Bearer"),
 								fieldWithPath("accessToken").description("액세스 토큰"),
@@ -115,13 +113,19 @@ class TokenRefreshE2ETest {
 
 
 		MvcResult mvcResult = resultActions.andReturn();
-		TokenRefreshResponse response = objectMapper
-				.readValue(mvcResult.getResponse().getContentAsString(), TokenRefreshResponse.class);
+		TokenRefreshDto.Response response = objectMapper
+				.readValue(mvcResult.getResponse().getContentAsString(), TokenRefreshDto.Response.class);
 		assertThat(response.getAccessToken()).isNotBlank();
 	}
 
+	private TokenRefreshDto.Request createTokenRefreshRequest(String refreshToken) {
+		TokenRefreshDto.Request request = new TokenRefreshDto.Request();
+		request.setRefreshToken(refreshToken);
+		return request;
+	}
+
 	@Test
-	@DisplayName("AuthController(E2E): 토큰 리프레시, 쿠키 없음")
+	@DisplayName("AuthController(E2E): 토큰 리프레시, 요청 JSON이 없음.")
 	void givenNotExistsRefreshTokenCookie_whenRefreshToken_thenFail() throws Exception {
 		//given
 		//when
@@ -132,7 +136,7 @@ class TokenRefreshE2ETest {
 		//then
 		resultActions.andDo(
 				document(
-						"token-refresh-fail-not-exists-cookie",
+						"token-refresh-fail-not-exists-request",
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")
@@ -151,17 +155,21 @@ class TokenRefreshE2ETest {
 	@DisplayName("AuthController(E2E): 토큰 리프레시, 토큰 유효성 검사 실패")
 	void givenInvalidRefreshToken_whenRefreshToken_thenFail() throws Exception {
 		//given
-		Cookie refreshTokenCookie = createRefreshTokenCookie("invalidRefreshToken");
+		TokenRefreshDto.Request request = createTokenRefreshRequest("invalidRefreshToken");
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.post("/api/auth/refresh")
-						.cookie(refreshTokenCookie)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
 		).andExpect(status().isUnauthorized());
 
 		//then
 		resultActions.andDo(
 				document(
 						"token-refresh-fail-invalid-refresh-token",
+						requestFields(
+								fieldWithPath("refreshToken").description("리프레시 토큰")
+						),
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")
@@ -176,25 +184,29 @@ class TokenRefreshE2ETest {
 	}
 
 	@Test
-	@DisplayName("AuthController(E2E): 토큰 리프레시, 액세스 토큰 쿠키")
-	void givenAccessTokenCookie_whenRefreshToken_thenFail() throws Exception {
+	@DisplayName("AuthController(E2E): 토큰 리프레시, 액세스 토큰을 넣음.")
+	void givenRequestAccessToken_whenRefreshToken_thenFail() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
 		JwtTokenDto jwtTokenDto = authService
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 		String accessToken = jwtTokenDto.getAccessToken();
-		Cookie refreshTokenCookie = createRefreshTokenCookie(accessToken);
+		TokenRefreshDto.Request request = createTokenRefreshRequest(accessToken);
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.post("/api/auth/refresh")
-						.cookie(refreshTokenCookie)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
 		).andExpect(status().isUnauthorized());
 
 		//then
 		resultActions.andDo(
 				document(
-						"token-refresh-fail-access-token-cookie",
+						"token-refresh-fail-by-access-token",
+						requestFields(
+								fieldWithPath("refreshToken").description("리프레시 토큰")
+						),
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")
@@ -216,19 +228,23 @@ class TokenRefreshE2ETest {
 		JwtTokenDto jwtTokenDto = authService
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 		String originalRefreshToken = jwtTokenDto.getRefreshToken();
-		Cookie refreshTokenCookie = createRefreshTokenCookie(originalRefreshToken);
+		TokenRefreshDto.Request request = createTokenRefreshRequest(originalRefreshToken);
 		refreshTokenService.removeRefreshToken(member.getId());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.post("/api/auth/refresh")
-						.cookie(refreshTokenCookie)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
 		).andExpect(status().isUnauthorized());
 
 		//then
 		resultActions.andDo(
 				document(
 						"token-refresh-fail-not-found-refresh-token",
+						requestFields(
+								fieldWithPath("refreshToken").description("리프레시 토큰")
+						),
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")
@@ -250,19 +266,23 @@ class TokenRefreshE2ETest {
 		JwtTokenDto jwtTokenDto = authService
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 		String originalRefreshToken = jwtTokenDto.getRefreshToken();
-		Cookie refreshTokenCookie = createRefreshTokenCookie(originalRefreshToken);
+		TokenRefreshDto.Request request = createTokenRefreshRequest(originalRefreshToken);
 		refreshTokenService.updateRefreshToken(member.getId(), originalRefreshToken, LocalDateTime.now().minusSeconds(1));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.post("/api/auth/refresh")
-						.cookie(refreshTokenCookie)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request))
 		).andExpect(status().isUnauthorized());
 
 		//then
 		resultActions.andDo(
 				document(
 						"token-refresh-fail-expired-refresh-token-from-db",
+						requestFields(
+								fieldWithPath("refreshToken").description("리프레시 토큰")
+						),
 						responseFields(
 								fieldWithPath("errorCode").description("에러 코드"),
 								fieldWithPath("errorMessage").description("에러 메시지")
@@ -283,11 +303,4 @@ class TokenRefreshE2ETest {
 		return request;
 	}
 
-
-	private Cookie createRefreshTokenCookie(String refreshToken) {
-		Cookie cookie = new Cookie(oAuth2Config.getAuth().getRefreshCookieKey(), refreshToken);
-		cookie.setPath("/");
-		cookie.setMaxAge((int) (oAuth2Config.getAuth().getRefreshTokenValidityInMs() / 1000));
-		return cookie;
-	}
 }

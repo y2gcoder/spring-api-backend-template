@@ -2,7 +2,7 @@ package com.y2gcoder.app.api.auth.service;
 
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
-import com.y2gcoder.app.api.auth.service.dto.TokenRefreshResponse;
+import com.y2gcoder.app.api.auth.service.dto.TokenRefreshDto;
 import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
@@ -80,15 +80,15 @@ public class AuthService {
 		}
 	}
 
-	public TokenRefreshResponse refreshToken(String refreshToken) {
-		validateRefreshToken(refreshToken);
+	public TokenRefreshDto.Response refreshToken(TokenRefreshDto.Request request) {
+		validateRefreshToken(request.getRefreshToken());
 
-		RefreshToken refreshTokenEntity = refreshTokenService.findTokenByRefreshToken(refreshToken);
+		RefreshToken refreshTokenEntity = refreshTokenService.findTokenByRefreshToken(request.getRefreshToken());
 		Member member = memberService.findMemberById(refreshTokenEntity.getMemberId());
 		Date accessTokenExpireTime = jwtTokenProvider.createAccessTokenExpireTime();
 		String accessToken =
 				jwtTokenProvider.createAccessToken(String.valueOf(member.getId()), member.getRole(), accessTokenExpireTime);
-		return TokenRefreshResponse.builder()
+		return TokenRefreshDto.Response.builder()
 				.grantType(GrantType.BEARER.getType())
 				.accessToken(accessToken)
 				.accessTokenExpireTime(DateTimeUtils.convertToLocalDateTime(accessTokenExpireTime))

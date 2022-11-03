@@ -23,7 +23,6 @@ spring:
 app:
   auth:
     token-secret: ${token-secret}
-    refresh-cookie-key: refreshtoken
     access-token-validity-in-ms: 900000
     refresh-token-validity-in-ms: 1209600000
   oauth2:

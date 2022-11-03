@@ -7,6 +7,7 @@ import com.y2gcoder.app.domain.member.constant.AuthProvider;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
+import com.y2gcoder.app.domain.token.entity.RefreshToken;
 import com.y2gcoder.app.domain.token.repository.RefreshTokenRepository;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.ErrorResponse;
@@ -28,7 +29,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.Cookie;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -56,8 +57,6 @@ class SignInE2ETest {
 	private ObjectMapper objectMapper;
 
 	private Member savedMember;
-
-	private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshtoken";
 
 	@BeforeEach
 	public void beforeEach() {
@@ -98,7 +97,9 @@ class SignInE2ETest {
 						responseFields(
 								fieldWithPath("grantType").description("Bearer"),
 								fieldWithPath("accessToken").description("액세스 토큰"),
-								fieldWithPath("accessTokenExpireTime").description("액세스 토큰 만료 시간")
+								fieldWithPath("accessTokenExpireTime").description("액세스 토큰 만료 시간"),
+								fieldWithPath("refreshToken").description("리프레시 토큰"),
+								fieldWithPath("refreshTokenExpireTime").description("리프레시 토큰 만료 시간")
 						)
 				)
 		);
@@ -108,10 +109,11 @@ class SignInE2ETest {
 				.readValue(mvcResult.getResponse().getContentAsString(), SignInDto.Response.class);
 		assertThat(result.getAccessToken()).isNotBlank();
 
-		assertThat(refreshTokenRepository.findByMemberId(savedMember.getId())).isNotEmpty();
+		Optional<RefreshToken> optionalRefreshToken = refreshTokenRepository.findByMemberId(savedMember.getId());
+		assertThat(optionalRefreshToken).isNotEmpty();
+		String savedRefreshToken = optionalRefreshToken.get().getRefreshToken();
+		assertThat(result.getRefreshToken()).isEqualTo(savedRefreshToken);
 
-		Cookie resultCookie = mvcResult.getResponse().getCookie(REFRESH_TOKEN_COOKIE_NAME);
-		assertThat(resultCookie).isNotNull();
 	}
 
 	@Test

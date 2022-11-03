@@ -27,7 +27,6 @@ class PropertiesConfigurationTest {
 		//then
 		assertThat(oAuth2Config.getOAuth2().getAuthorizedRedirectUris()).contains("http://localhost:3000/oauth2/redirect");
 		assertThat(oAuth2Config.getAuth().getTokenSecret()).isNotEmpty();
-		assertThat(oAuth2Config.getAuth().getRefreshCookieKey()).isEqualTo("refreshtoken");
 		assertThat(oAuth2Config.getAuth().getAccessTokenValidityInMs()).isNotZero().isPositive();
 		assertThat(oAuth2Config.getAuth().getRefreshTokenValidityInMs()).isNotZero().isPositive();
 	}
