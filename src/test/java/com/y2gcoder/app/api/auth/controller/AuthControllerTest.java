@@ -8,7 +8,6 @@ import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
 import com.y2gcoder.app.api.auth.service.dto.TokenRefreshDto;
 import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.global.jwt.constant.GrantType;
-import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.resolver.signinmember.SignInMemberArgumentResolver;
 import com.y2gcoder.app.global.resolver.signinmember.SignInMemberDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +25,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,8 +85,8 @@ class AuthControllerTest {
 	void whenSignIn_thenSuccess() throws Exception {
 		//given
 		SignInDto.Request request = createSignInRequest();
-		JwtTokenDto jwtTokenDto = createJwtTokenDto();
-		doReturn(jwtTokenDto).when(authService).signIn(any(SignInDto.Request.class));
+		SignInDto.Response signInResponse = createSignInResponse();
+		doReturn(signInResponse).when(authService).signIn(any(SignInDto.Request.class));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
@@ -101,7 +99,7 @@ class AuthControllerTest {
 		MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
 		SignInDto.Response result = objectMapper
 				.readValue(mvcResult.getResponse().getContentAsString(), SignInDto.Response.class);
-		assertThat(result.getAccessToken()).isEqualTo(jwtTokenDto.getAccessToken());
+		assertThat(result.getAccessToken()).isEqualTo(signInResponse.getAccessToken());
 	}
 
 	private SignInDto.Request createSignInRequest() {
@@ -152,13 +150,13 @@ class AuthControllerTest {
 				.build();
 	}
 
-	private JwtTokenDto createJwtTokenDto() {
-		return JwtTokenDto.builder()
+	private SignInDto.Response createSignInResponse() {
+		return SignInDto.Response.builder()
 				.grantType(GrantType.BEARER.getType())
 				.accessToken("access")
-				.accessTokenExpireTime(new Date())
+				.accessTokenExpireTime(LocalDateTime.now())
 				.refreshToken("refresh")
-				.refreshTokenExpireTime(new Date())
+				.refreshTokenExpireTime(LocalDateTime.now())
 				.build();
 	}
 

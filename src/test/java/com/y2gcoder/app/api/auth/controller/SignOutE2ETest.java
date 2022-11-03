@@ -10,7 +10,6 @@ import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
 import com.y2gcoder.app.domain.token.repository.RefreshTokenRepository;
 import com.y2gcoder.app.global.error.ErrorResponse;
-import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -79,13 +78,13 @@ class SignOutE2ETest {
 	void whenSignOut_thenSuccess() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
-		JwtTokenDto jwtTokenDto = authService
+		SignInDto.Response signInResponse = authService
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.post("/api/auth/sign-out")
-						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(jwtTokenDto))
+						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(signInResponse))
 		).andExpect(status().isOk());
 
 		//then
@@ -164,13 +163,13 @@ class SignOutE2ETest {
 	void givenRefreshToken_whenSignOut_thenFail() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
-		JwtTokenDto jwtTokenDto = authService
+		SignInDto.Response signInResponse = authService
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.post("/api/auth/sign-out")
-						.header(HttpHeaders.AUTHORIZATION, jwtTokenDto.getGrantType() + " " + jwtTokenDto.getRefreshToken())
+						.header(HttpHeaders.AUTHORIZATION, signInResponse.getGrantType() + " " + signInResponse.getRefreshToken())
 		).andExpect(status().isUnauthorized());
 
 		//then
@@ -197,8 +196,8 @@ class SignOutE2ETest {
 		return request;
 	}
 
-	private static String createAuthorizationHeaderValue(JwtTokenDto jwtTokenDto) {
-		return jwtTokenDto.getGrantType() + " " + jwtTokenDto.getAccessToken();
+	private static String createAuthorizationHeaderValue(SignInDto.Response signInResponse) {
+		return signInResponse.getGrantType() + " " + signInResponse.getAccessToken();
 	}
 
 }

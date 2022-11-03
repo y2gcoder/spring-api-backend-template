@@ -2,6 +2,7 @@ package com.y2gcoder.app.api.auth.service.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,6 +49,17 @@ public class SignInDto {
 			this.accessTokenExpireTime = accessTokenExpireTime;
 			this.refreshToken = refreshToken;
 			this.refreshTokenExpireTime = refreshTokenExpireTime;
+		}
+
+		public static Response from(JwtTokenDto jwtTokenDto) {
+			return Response
+					.builder()
+					.grantType(jwtTokenDto.getGrantType())
+					.accessToken(jwtTokenDto.getAccessToken())
+					.accessTokenExpireTime(jwtTokenDto.getAccessTokenExpireTime())
+					.refreshToken(jwtTokenDto.getRefreshToken())
+					.refreshTokenExpireTime(jwtTokenDto.getRefreshTokenExpireTime())
+					.build();
 		}
 	}
 }

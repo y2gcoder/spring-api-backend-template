@@ -52,7 +52,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public JwtTokenDto signIn(SignInDto.Request request) {
+	public SignInDto.Response signIn(SignInDto.Request request) {
 		Member member = memberService.findMemberByEmail(request.getEmail());
 		validateMemberAuthProvider(member.getProvider());
 		validatePassword(request.getPassword(), member.getPassword());
@@ -65,7 +65,7 @@ public class AuthService {
 				jwtTokenDto.getRefreshTokenExpireTime()
 		);
 
-		return jwtTokenDto;
+		return SignInDto.Response.from(jwtTokenDto);
 	}
 
 	private void validateMemberAuthProvider(AuthProvider provider) {

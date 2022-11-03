@@ -10,7 +10,6 @@ import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
 import com.y2gcoder.app.global.error.ErrorResponse;
-import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -80,12 +79,12 @@ class WhoAmIE2ETest {
 	@DisplayName("MemberInfoController(E2E): 내 정보 조회, 성공")
 	void whenWhoAmI_thenSuccess() throws Exception {
 		//given
-		JwtTokenDto jwtTokenDto = authService.signIn(createSignInRequest(member1.getEmail(), PASSWORD));
+		SignInDto.Response signInResponse = authService.signIn(createSignInRequest(member1.getEmail(), PASSWORD));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.get("/api/members/me")
-						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(jwtTokenDto))
+						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(signInResponse))
 		).andExpect(status().isOk());
 
 		//then
@@ -168,12 +167,12 @@ class WhoAmIE2ETest {
 	@DisplayName("MemberInfoController(E2E): 내 정보 조회, 인증 헤더에 리프레시 토큰")
 	void givenRefreshToken_whenWhoAmI_thenFail() throws Exception {
 		//given
-		JwtTokenDto jwtTokenDto = authService.signIn(createSignInRequest(member1.getEmail(), PASSWORD));
+		SignInDto.Response signInResponse = authService.signIn(createSignInRequest(member1.getEmail(), PASSWORD));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.get("/api/members/me")
-						.header(HttpHeaders.AUTHORIZATION, jwtTokenDto.getGrantType() + " " + jwtTokenDto.getRefreshToken())
+						.header(HttpHeaders.AUTHORIZATION, signInResponse.getGrantType() + " " + signInResponse.getRefreshToken())
 		).andExpect(status().isUnauthorized());
 
 		//then
@@ -201,7 +200,7 @@ class WhoAmIE2ETest {
 		return request;
 	}
 
-	private static String createAuthorizationHeaderValue(JwtTokenDto jwtTokenDto) {
-		return jwtTokenDto.getGrantType() + " " + jwtTokenDto.getAccessToken();
+	private static String createAuthorizationHeaderValue(SignInDto.Response signInResponse) {
+		return signInResponse.getGrantType() + " " + signInResponse.getAccessToken();
 	}
 }

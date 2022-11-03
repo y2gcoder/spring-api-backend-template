@@ -90,7 +90,7 @@ class AuthServiceTest {
 		doReturn(true).when(passwordEncoder).matches(request.getPassword(), member.getPassword());
 		doReturn(jwtTokenDto).when(jwtTokenProvider).createJwtToken(anyString(), any());
 		//when
-		JwtTokenDto result = authService.signIn(request);
+		SignInDto.Response result = authService.signIn(request);
 		//then
 		assertThat(result.getAccessToken()).isEqualTo(jwtTokenDto.getAccessToken());
 		assertThat(result.getRefreshToken()).isEqualTo(jwtTokenDto.getRefreshToken());

@@ -12,7 +12,6 @@ import com.y2gcoder.app.domain.member.repository.MemberRepository;
 import com.y2gcoder.app.domain.token.service.RefreshTokenService;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.ErrorResponse;
-import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -82,9 +81,9 @@ class TokenRefreshE2ETest {
 	void whenRefreshToken_thenSuccess() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
-		JwtTokenDto jwtTokenDto = authService
+		SignInDto.Response signInResponse = authService
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
-		String originalRefreshToken = jwtTokenDto.getRefreshToken();
+		String originalRefreshToken = signInResponse.getRefreshToken();
 		TokenRefreshDto.Request request = createTokenRefreshRequest(originalRefreshToken);
 
 		//when
@@ -188,9 +187,9 @@ class TokenRefreshE2ETest {
 	void givenRequestAccessToken_whenRefreshToken_thenFail() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
-		JwtTokenDto jwtTokenDto = authService
+		SignInDto.Response signInResponse = authService
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
-		String accessToken = jwtTokenDto.getAccessToken();
+		String accessToken = signInResponse.getAccessToken();
 		TokenRefreshDto.Request request = createTokenRefreshRequest(accessToken);
 
 		//when
@@ -225,9 +224,9 @@ class TokenRefreshE2ETest {
 	void givenNotFoundMemberByRefreshToken_whenRefreshToken_thenFail() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
-		JwtTokenDto jwtTokenDto = authService
+		SignInDto.Response signInResponse = authService
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
-		String originalRefreshToken = jwtTokenDto.getRefreshToken();
+		String originalRefreshToken = signInResponse.getRefreshToken();
 		TokenRefreshDto.Request request = createTokenRefreshRequest(originalRefreshToken);
 		refreshTokenService.removeRefreshToken(member.getId());
 
@@ -263,9 +262,9 @@ class TokenRefreshE2ETest {
 	void givenNotFoundMemberByExpiredRefreshTokenFromDB_whenRefreshToken_thenFail() throws Exception {
 		//given
 		Member member = memberRepository.findByEmail("test@test.com").get();
-		JwtTokenDto jwtTokenDto = authService
+		SignInDto.Response signInResponse = authService
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
-		String originalRefreshToken = jwtTokenDto.getRefreshToken();
+		String originalRefreshToken = signInResponse.getRefreshToken();
 		TokenRefreshDto.Request request = createTokenRefreshRequest(originalRefreshToken);
 		refreshTokenService.updateRefreshToken(member.getId(), originalRefreshToken, LocalDateTime.now().minusSeconds(1));
 

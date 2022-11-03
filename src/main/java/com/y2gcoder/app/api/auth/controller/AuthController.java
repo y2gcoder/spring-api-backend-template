@@ -4,7 +4,6 @@ import com.y2gcoder.app.api.auth.service.AuthService;
 import com.y2gcoder.app.api.auth.service.dto.SignInDto;
 import com.y2gcoder.app.api.auth.service.dto.SignUpRequest;
 import com.y2gcoder.app.api.auth.service.dto.TokenRefreshDto;
-import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.resolver.signinmember.SignInMember;
 import com.y2gcoder.app.global.resolver.signinmember.SignInMemberDto;
 import lombok.RequiredArgsConstructor;
@@ -32,14 +31,7 @@ public class AuthController {
 
 	@PostMapping("/sign-in")
 	public ResponseEntity<SignInDto.Response> signIn(@Valid @RequestBody SignInDto.Request req) {
-		JwtTokenDto jwtTokenDto = authService.signIn(req);
-		SignInDto.Response result = SignInDto.Response.builder()
-				.grantType(jwtTokenDto.getGrantType())
-				.accessToken(jwtTokenDto.getAccessToken())
-				.accessTokenExpireTime(jwtTokenDto.getAccessTokenExpireTime())
-				.refreshToken(jwtTokenDto.getRefreshToken())
-				.refreshTokenExpireTime(jwtTokenDto.getRefreshTokenExpireTime())
-				.build();
+		SignInDto.Response result = authService.signIn(req);
 		return ResponseEntity.ok().body(result);
 	}
 

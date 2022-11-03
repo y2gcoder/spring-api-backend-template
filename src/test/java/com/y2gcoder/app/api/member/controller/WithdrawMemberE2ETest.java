@@ -10,7 +10,6 @@ import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.repository.MemberRepository;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.ErrorResponse;
-import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -90,12 +89,12 @@ class WithdrawMemberE2ETest {
 	@DisplayName("MemberController(E2E): 회원 탈퇴, 자기 자신이 회원 탈퇴!")
 	void givenMember1_whenWithdrawMember1_thenSuccess() throws Exception {
 		//given
-		JwtTokenDto jwtTokenDto = authService.signIn(createSignInRequest(member1.getEmail(), PASSWORD));
+		SignInDto.Response signInResponse = authService.signIn(createSignInRequest(member1.getEmail(), PASSWORD));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.delete("/api/members/{id}", member1.getId())
-						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(jwtTokenDto))
+						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(signInResponse))
 		).andExpect(status().isOk());
 
 		//then
@@ -118,12 +117,12 @@ class WithdrawMemberE2ETest {
 	@DisplayName("MemberController(E2E): 회원 탈퇴, 관리자가 일반 사용자 탈퇴")
 	void givenAdminMember_whenWithdrawMember1_thenSuccess() throws Exception {
 		//given
-		JwtTokenDto jwtTokenDto = authService.signIn(createSignInRequest(admin.getEmail(), PASSWORD));
+		SignInDto.Response signInResponse = authService.signIn(createSignInRequest(admin.getEmail(), PASSWORD));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.delete("/api/members/{id}", member1.getId())
-						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(jwtTokenDto))
+						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(signInResponse))
 		).andExpect(status().isOk());
 
 		//then
@@ -206,12 +205,12 @@ class WithdrawMemberE2ETest {
 	@DisplayName("MemberController(E2E): 회원 탈퇴, 리프레시 토큰으로 탈퇴 시도")
 	void givenRefreshToken_whenWhoAmI_thenFail() throws Exception {
 		//given
-		JwtTokenDto jwtTokenDto = authService.signIn(createSignInRequest(member1.getEmail(), PASSWORD));
+		SignInDto.Response signInResponse = authService.signIn(createSignInRequest(member1.getEmail(), PASSWORD));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.delete("/api/members/{id}", member1.getId())
-						.header(HttpHeaders.AUTHORIZATION, jwtTokenDto.getGrantType() + " " + jwtTokenDto.getRefreshToken())
+						.header(HttpHeaders.AUTHORIZATION, signInResponse.getGrantType() + " " + signInResponse.getRefreshToken())
 		).andExpect(status().isUnauthorized());
 
 		//then
@@ -237,12 +236,12 @@ class WithdrawMemberE2ETest {
 	@Test
 	@DisplayName("MemberController(E2E): 회원 탈퇴, 일반 사용자가 다른 사용자를 탈퇴하려고 시도")
 	void givenMember2_whenWithdrawMember1_thenFail() throws Exception {
-		JwtTokenDto jwtTokenDto = authService.signIn(createSignInRequest(member2.getEmail(), PASSWORD));
+		SignInDto.Response signInResponse = authService.signIn(createSignInRequest(member2.getEmail(), PASSWORD));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.delete("/api/members/{id}", member1.getId())
-						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(jwtTokenDto))
+						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(signInResponse))
 		).andExpect(status().isForbidden());
 
 		//then
@@ -269,12 +268,12 @@ class WithdrawMemberE2ETest {
 	@DisplayName("MemberController(E2E): 회원 탈퇴, 없는 회원 탈퇴 시도")
 	void givenWrongMemberId_whenWithdrawMemberByAdmin_thenFail() throws Exception {
 		//given
-		JwtTokenDto jwtTokenDto = authService.signIn(createSignInRequest(admin.getEmail(), PASSWORD));
+		SignInDto.Response signInResponse = authService.signIn(createSignInRequest(admin.getEmail(), PASSWORD));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
 				RestDocumentationRequestBuilders.delete("/api/members/{id}", 4L)
-						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(jwtTokenDto))
+						.header(HttpHeaders.AUTHORIZATION, createAuthorizationHeaderValue(signInResponse))
 		).andExpect(status().isBadRequest());
 
 		//then
@@ -304,8 +303,8 @@ class WithdrawMemberE2ETest {
 		return request;
 	}
 
-	private static String createAuthorizationHeaderValue(JwtTokenDto jwtTokenDto) {
-		return jwtTokenDto.getGrantType() + " " + jwtTokenDto.getAccessToken();
+	private static String createAuthorizationHeaderValue(SignInDto.Response signInResponse) {
+		return signInResponse.getGrantType() + " " + signInResponse.getAccessToken();
 	}
 
 }
