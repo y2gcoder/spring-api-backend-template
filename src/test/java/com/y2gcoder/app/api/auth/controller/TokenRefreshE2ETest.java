@@ -105,7 +105,9 @@ class TokenRefreshE2ETest {
 						responseFields(
 								fieldWithPath("grantType").description("Bearer"),
 								fieldWithPath("accessToken").description("액세스 토큰"),
-								fieldWithPath("accessTokenExpireTime").description("액세스 토큰 만료 시간")
+								fieldWithPath("accessTokenExpireTime").description("액세스 토큰 만료 시간"),
+								fieldWithPath("refreshToken").description("리프레시 토큰"),
+								fieldWithPath("refreshTokenExpireTime").description("리프레시 토큰 만료 시간")
 						)
 				)
 		);
@@ -115,6 +117,7 @@ class TokenRefreshE2ETest {
 		TokenRefreshDto.Response response = objectMapper
 				.readValue(mvcResult.getResponse().getContentAsString(), TokenRefreshDto.Response.class);
 		assertThat(response.getAccessToken()).isNotBlank();
+		assertThat(response.getRefreshToken()).isNotBlank();
 	}
 
 	private TokenRefreshDto.Request createTokenRefreshRequest(String refreshToken) {

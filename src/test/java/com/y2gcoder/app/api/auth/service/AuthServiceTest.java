@@ -15,7 +15,6 @@ import com.y2gcoder.app.global.error.exception.BusinessException;
 import com.y2gcoder.app.global.jwt.constant.GrantType;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
-import com.y2gcoder.app.global.util.DateTimeUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -142,19 +141,43 @@ class AuthServiceTest {
 		doReturn(member).when(memberService).findMemberById(1L);
 
 		String newAccessToken = "newAccess";
-		LocalDateTime newAccessTokenExpireTime = LocalDateTime.now().plusMinutes(15L);
-		Date newAccessTokenExpireTimeToDate = convertLocalDateTimeToDate(newAccessTokenExpireTime);
-		doReturn(newAccessTokenExpireTimeToDate).when(jwtTokenProvider).createAccessTokenExpireTime();
-		doReturn(newAccessToken)
-				.when(jwtTokenProvider).createAccessToken(anyString(), any(), any());
+		LocalDateTime newAccessTokenExpireTime = LocalDateTime.now().plusMinutes(15);
+		Date newAccessTokenExpireDate = convertLocalDateTimeToDate(newAccessTokenExpireTime);
+		String newRefreshToken = "newRefresh";
+		LocalDateTime newRefreshTokenExpireTime = LocalDateTime.now().plusWeeks(2);
+		Date newRefreshTokenExpireDate = convertLocalDateTimeToDate(newRefreshTokenExpireTime);
+
+		JwtTokenDto jwtTokenDto = createJwtTokenDto(
+				newAccessToken,
+				newAccessTokenExpireDate,
+				newRefreshToken,
+				newRefreshTokenExpireDate
+		);
+
+		doReturn(jwtTokenDto).when(jwtTokenProvider).createJwtToken(anyString(), any(MemberRole.class));
 
 		//when
 		TokenRefreshDto.Response response = authService.refreshToken(request);
 
 		//then
 		assertThat(response.getAccessToken()).isEqualTo(newAccessToken);
-		assertThat(response.getAccessTokenExpireTime())
-				.isEqualTo(DateTimeUtils.convertToLocalDateTime(newAccessTokenExpireTimeToDate));
+		assertThat(response.getRefreshToken()).isEqualTo(newRefreshToken);
+
+	}
+
+	private JwtTokenDto createJwtTokenDto(
+			String newAccessToken,
+			Date newAccessTokenExpireDate,
+			String newRefreshToken,
+			Date newRefreshTokenExpireDate
+	) {
+		return JwtTokenDto.builder()
+				.grantType(GrantType.BEARER.getType())
+				.accessToken(newAccessToken)
+				.accessTokenExpireTime(newAccessTokenExpireDate)
+				.refreshToken(newRefreshToken)
+				.refreshTokenExpireTime(newRefreshTokenExpireDate)
+				.build();
 	}
 
 	private RefreshToken createRefreshTokenEntity(Long memberId, String refreshToken, LocalDateTime tokenExpireTime) {

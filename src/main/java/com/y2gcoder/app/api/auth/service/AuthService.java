@@ -12,16 +12,12 @@ import com.y2gcoder.app.domain.token.service.TokenService;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.error.exception.BusinessException;
-import com.y2gcoder.app.global.jwt.constant.GrantType;
 import com.y2gcoder.app.global.jwt.dto.JwtTokenDto;
 import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
-import com.y2gcoder.app.global.util.DateTimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -85,14 +81,16 @@ public class AuthService {
 
 		RefreshToken refreshTokenEntity = tokenService.findTokenByRefreshToken(request.getRefreshToken());
 		Member member = memberService.findMemberById(refreshTokenEntity.getMemberId());
-		Date accessTokenExpireTime = jwtTokenProvider.createAccessTokenExpireTime();
-		String accessToken =
-				jwtTokenProvider.createAccessToken(String.valueOf(member.getId()), member.getRole(), accessTokenExpireTime);
-		return TokenRefreshDto.Response.builder()
-				.grantType(GrantType.BEARER.getType())
-				.accessToken(accessToken)
-				.accessTokenExpireTime(DateTimeUtils.convertToLocalDateTime(accessTokenExpireTime))
-				.build();
+
+		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
+
+		tokenService.updateRefreshToken(
+				member.getId(),
+				jwtTokenDto.getRefreshToken(),
+				jwtTokenDto.getRefreshTokenExpireTime()
+		);
+
+		return TokenRefreshDto.Response.from(jwtTokenDto);
 	}
 
 	private void validateRefreshToken(String refreshToken) {
