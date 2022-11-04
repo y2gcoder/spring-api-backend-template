@@ -17,10 +17,8 @@ import com.y2gcoder.app.global.jwt.service.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
 public class AuthService {
 	private final JwtTokenProvider jwtTokenProvider;
@@ -29,7 +27,6 @@ public class AuthService {
 
 	private final RefreshTokenService refreshTokenService;
 
-	@Transactional
 	public void signUp(SignUpRequest request) {
 		validateSignUpInfo(request);
 		Member member = Member.builder()
@@ -47,7 +44,6 @@ public class AuthService {
 		}
 	}
 
-	@Transactional
 	public SignInDto.Response signIn(SignInDto.Request request) {
 		Member member = memberService.findMemberByEmail(request.getEmail());
 		validateMemberAuthProvider(member.getProvider());
@@ -100,7 +96,6 @@ public class AuthService {
 		}
 	}
 
-	@Transactional
 	public void signOut(Long memberId) {
 		refreshTokenService.removeRefreshToken(memberId);
 	}
