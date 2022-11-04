@@ -20,9 +20,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TokenServiceTest {
+class RefreshTokenServiceTest {
 	@InjectMocks
-	private TokenService tokenService;
+	private RefreshTokenService refreshTokenService;
 
 	@Mock
 	private RefreshTokenRepository refreshTokenRepository;
@@ -37,7 +37,7 @@ class TokenServiceTest {
 		doReturn(Optional.empty()).when(refreshTokenRepository).findByMemberId(anyLong());
 
 		//when
-		tokenService.updateRefreshToken(memberId, refreshToken, tokenExpireTime);
+		refreshTokenService.updateRefreshToken(memberId, refreshToken, tokenExpireTime);
 
 		//then
 		verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
@@ -56,7 +56,7 @@ class TokenServiceTest {
 		//when
 		String newRefreshToken = "newRefreshToken";
 		LocalDateTime newTokenExpireTime = LocalDateTime.of(2022, 11, 1, 21, 36, 37);
-	  tokenService.updateRefreshToken(memberId, newRefreshToken, newTokenExpireTime);
+	  refreshTokenService.updateRefreshToken(memberId, newRefreshToken, newTokenExpireTime);
 
 		//then
 		assertThat(refreshTokenEntity.getRefreshToken()).isEqualTo(newRefreshToken);
@@ -74,7 +74,7 @@ class TokenServiceTest {
 		doReturn(Optional.of(refreshTokenEntity)).when(refreshTokenRepository).findByMemberId(memberId);
 
 		//when
-		tokenService.removeRefreshToken(memberId);
+		refreshTokenService.removeRefreshToken(memberId);
 
 		//then
 		verify(refreshTokenRepository, times(1)).delete(any(RefreshToken.class));
@@ -87,7 +87,7 @@ class TokenServiceTest {
 		Long memberId = 1L;
 		doReturn(Optional.empty()).when(refreshTokenRepository).findByMemberId(memberId);
 		//when
-		tokenService.removeRefreshToken(memberId);
+		refreshTokenService.removeRefreshToken(memberId);
 
 		//then
 		verify(refreshTokenRepository, times(0)).delete(any(RefreshToken.class));
@@ -104,7 +104,7 @@ class TokenServiceTest {
 		doReturn(Optional.of(refreshTokenEntity)).when(refreshTokenRepository).findByRefreshToken(refreshToken);
 
 		//when
-		RefreshToken result = tokenService.findTokenByRefreshToken(refreshToken);
+		RefreshToken result = refreshTokenService.findTokenByRefreshToken(refreshToken);
 
 		//then
 		assertThat(result.getRefreshToken()).isEqualTo(refreshToken);
@@ -119,7 +119,7 @@ class TokenServiceTest {
 
 		//when
 		//then
-		assertThatThrownBy(() -> tokenService.findTokenByRefreshToken(refreshToken))
+		assertThatThrownBy(() -> refreshTokenService.findTokenByRefreshToken(refreshToken))
 				.isInstanceOf(AuthenticationException.class)
 				.hasMessage(ErrorCode.NOT_FOUND_REFRESH_TOKEN.getMessage());
 	}
@@ -136,7 +136,7 @@ class TokenServiceTest {
 
 		//when
 		//then
-		assertThatThrownBy(() -> tokenService.findTokenByRefreshToken(refreshToken))
+		assertThatThrownBy(() -> refreshTokenService.findTokenByRefreshToken(refreshToken))
 				.isInstanceOf(AuthenticationException.class)
 				.hasMessage(ErrorCode.EXPIRED_REFRESH_TOKEN.getMessage());
 	}

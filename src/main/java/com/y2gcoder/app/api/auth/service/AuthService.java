@@ -8,7 +8,7 @@ import com.y2gcoder.app.domain.member.constant.MemberRole;
 import com.y2gcoder.app.domain.member.entity.Member;
 import com.y2gcoder.app.domain.member.service.MemberService;
 import com.y2gcoder.app.domain.token.entity.RefreshToken;
-import com.y2gcoder.app.domain.token.service.TokenService;
+import com.y2gcoder.app.domain.token.service.RefreshTokenService;
 import com.y2gcoder.app.global.error.ErrorCode;
 import com.y2gcoder.app.global.error.exception.AuthenticationException;
 import com.y2gcoder.app.global.error.exception.BusinessException;
@@ -27,7 +27,7 @@ public class AuthService {
 	private final MemberService memberService;
 	private final PasswordEncoder passwordEncoder;
 
-	private final TokenService tokenService;
+	private final RefreshTokenService refreshTokenService;
 
 	@Transactional
 	public void signUp(SignUpRequest request) {
@@ -55,7 +55,7 @@ public class AuthService {
 		// 토큰 만들기(access, refresh)
 		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
 		// refresh token 저장 (DB)
-		tokenService.updateRefreshToken(
+		refreshTokenService.updateRefreshToken(
 				member.getId(),
 				jwtTokenDto.getRefreshToken(),
 				jwtTokenDto.getRefreshTokenExpireTime()
@@ -79,12 +79,12 @@ public class AuthService {
 	public TokenRefreshDto.Response refreshToken(TokenRefreshDto.Request request) {
 		validateRefreshToken(request.getRefreshToken());
 
-		RefreshToken refreshTokenEntity = tokenService.findTokenByRefreshToken(request.getRefreshToken());
+		RefreshToken refreshTokenEntity = refreshTokenService.findTokenByRefreshToken(request.getRefreshToken());
 		Member member = memberService.findMemberById(refreshTokenEntity.getMemberId());
 
 		JwtTokenDto jwtTokenDto = jwtTokenProvider.createJwtToken(String.valueOf(member.getId()), member.getRole());
 
-		tokenService.updateRefreshToken(
+		refreshTokenService.updateRefreshToken(
 				member.getId(),
 				jwtTokenDto.getRefreshToken(),
 				jwtTokenDto.getRefreshTokenExpireTime()
@@ -102,6 +102,6 @@ public class AuthService {
 
 	@Transactional
 	public void signOut(Long memberId) {
-		tokenService.removeRefreshToken(memberId);
+		refreshTokenService.removeRefreshToken(memberId);
 	}
 }

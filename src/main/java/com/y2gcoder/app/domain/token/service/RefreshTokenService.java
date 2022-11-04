@@ -16,7 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
-public class TokenService {
+public class RefreshTokenService {
 
 	private final RefreshTokenRepository refreshTokenRepository;
 
