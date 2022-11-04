@@ -97,6 +97,6 @@ public class AuthService {
 	}
 
 	public void signOut(Long memberId) {
-		refreshTokenService.removeRefreshToken(memberId);
+		refreshTokenService.removeRefreshTokenByMemberId(memberId);
 	}
 }

@@ -37,7 +37,7 @@ public class RefreshTokenService {
 	}
 
 	@Transactional
-	public void removeRefreshToken(Long memberId) {
+	public void removeRefreshTokenByMemberId(Long memberId) {
 		Optional<RefreshToken> optionalRefreshToken = refreshTokenRepository.findByMemberId(memberId);
 		if (optionalRefreshToken.isEmpty()) {
 			log.info("찾고자 하는 refresh token 없음.");

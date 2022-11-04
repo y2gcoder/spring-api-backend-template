@@ -215,7 +215,7 @@ class AuthServiceTest {
 		authService.signOut(1L);
 
 		//then
-		verify(refreshTokenService, times(1)).removeRefreshToken(1L);
+		verify(refreshTokenService, times(1)).removeRefreshTokenByMemberId(1L);
 	}
 
 	private SignUpRequest createSignUpRequest() {

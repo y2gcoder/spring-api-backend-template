@@ -64,8 +64,8 @@ class RefreshTokenServiceTest {
 	}
 
 	@Test
-	@DisplayName("RefreshTokenService: removeRefreshToken, 삭제, 성공")
-	void givenExistsRefreshToken_whenRemoveRefreshToken_thenSuccess() {
+	@DisplayName("RefreshTokenService: removeRefreshTokenByMemberId, 삭제, 성공")
+	void givenExistsRefreshToken_whenRemoveRefreshTokenByMemberId_thenSuccess() {
 		//given
 		Long memberId = 1L;
 		String refreshToken = "refreshToken";
@@ -74,20 +74,20 @@ class RefreshTokenServiceTest {
 		doReturn(Optional.of(refreshTokenEntity)).when(refreshTokenRepository).findByMemberId(memberId);
 
 		//when
-		refreshTokenService.removeRefreshToken(memberId);
+		refreshTokenService.removeRefreshTokenByMemberId(memberId);
 
 		//then
 		verify(refreshTokenRepository, times(1)).delete(any(RefreshToken.class));
 	}
 
 	@Test
-	@DisplayName("RefreshTokenService: removeRefreshToken, 이미 토큰 없음, 성공")
-	void givenNotExistsRefreshToken_whenRemoveRefreshToken_thenSuccess() {
+	@DisplayName("RefreshTokenService: removeRefreshTokenByMemberId, 이미 토큰 없음, 성공")
+	void givenNotExistsRefreshToken_whenRemoveRefreshTokenByMemberId_thenSuccess() {
 		//given
 		Long memberId = 1L;
 		doReturn(Optional.empty()).when(refreshTokenRepository).findByMemberId(memberId);
 		//when
-		refreshTokenService.removeRefreshToken(memberId);
+		refreshTokenService.removeRefreshTokenByMemberId(memberId);
 
 		//then
 		verify(refreshTokenRepository, times(0)).delete(any(RefreshToken.class));

@@ -231,7 +231,7 @@ class TokenRefreshE2ETest {
 				.signIn(createSignInRequest(member.getEmail(), "!q2w3e4r"));
 		String originalRefreshToken = signInResponse.getRefreshToken();
 		TokenRefreshDto.Request request = createTokenRefreshRequest(originalRefreshToken);
-		refreshTokenService.removeRefreshToken(member.getId());
+		refreshTokenService.removeRefreshTokenByMemberId(member.getId());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(
